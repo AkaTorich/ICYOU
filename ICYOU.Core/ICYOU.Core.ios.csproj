@@ -4,6 +4,9 @@
     <TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
