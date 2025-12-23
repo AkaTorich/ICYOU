@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>1.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
