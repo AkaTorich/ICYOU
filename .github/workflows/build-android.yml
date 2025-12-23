@@ -54,9 +54,6 @@ jobs:
         dotnet workload install android --source https://api.nuget.org/v3/index.json
         dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
 
-    - name: Restore dependencies
-      run: dotnet restore
-
     - name: Determine project files
       id: project-files
       run: |
@@ -77,6 +74,15 @@ jobs:
           echo "mobile_project=ICYOU.Mobile/ICYOU.Mobile.csproj" >> $GITHUB_OUTPUT
           echo "apk_name=ICYOU.Mobile-x64.apk" >> $GITHUB_OUTPUT
         fi
+
+    - name: Restore dependencies
+      run: |
+        dotnet restore ${{ steps.project-files.outputs.sdk_project }}
+        dotnet restore ${{ steps.project-files.outputs.core_project }}
+        dotnet restore ${{ steps.project-files.outputs.e2e_project }}
+        dotnet restore ${{ steps.project-files.outputs.quote_project }}
+        dotnet restore ${{ steps.project-files.outputs.preview_project }}
+        dotnet restore ${{ steps.project-files.outputs.mobile_project }}
 
     - name: Build ICYOU.SDK
       run: dotnet build ${{ steps.project-files.outputs.sdk_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
