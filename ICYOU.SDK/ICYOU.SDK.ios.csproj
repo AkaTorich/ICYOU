@@ -8,6 +8,7 @@
     <NoWarn>CS1591</NoWarn>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <TargetPlatformVersion>17.0</TargetPlatformVersion>
   </PropertyGroup>
 
 </Project>
