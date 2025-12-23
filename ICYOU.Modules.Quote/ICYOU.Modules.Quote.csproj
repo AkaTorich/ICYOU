@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net10.0-android</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifier>android-x64</RuntimeIdentifier>
+    <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == '' AND '$(TargetFramework)' == 'net10.0-android'">C:\Users\psysh\AppData\Local\Android\Sdk</AndroidSdkDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
+  </ItemGroup>
+
+</Project>
+

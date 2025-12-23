@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ICYOU.Mobile.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:ICYOU.Mobile.Pages"
+    Shell.FlyoutBehavior="Disabled">
+
+    <!-- Main tabs -->
+    <TabBar x:Name="MainTabs">
+        <ShellContent
+            Title="Чаты"
+            ContentTemplate="{DataTemplate pages:ChatsListPage}"
+            Icon="chat.png" />
+        <ShellContent
+            Title="Друзья"
+            ContentTemplate="{DataTemplate pages:FriendsPage}"
+            Icon="people.png" />
+        <ShellContent
+            Title="Настройки"
+            ContentTemplate="{DataTemplate pages:SettingsPage}"
+            Icon="settings.png" />
+    </TabBar>
+
+</Shell>

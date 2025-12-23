@@ -1,0 +1,117 @@
+name: Build Android App
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ICYOU.Mobile/**'
+      - 'ICYOU.Core/**'
+      - 'ICYOU.SDK/**'
+      - 'ICYOU.Modules.*/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Позволяет запускать вручную
+    inputs:
+      architecture:
+        description: 'Target architecture'
+        required: true
+        default: 'android-x64'
+        type: choice
+        options:
+          - android-x64
+          - android-arm64
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest # Linux runner (быстрее и дешевле)
+
+    strategy:
+      matrix:
+        architecture: [android-x64, android-arm64]
+        # Если запущено вручную, используйте выбранную архитектуру
+        exclude:
+          - architecture: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.architecture != 'android-x64' && 'android-x64' || 'none' }}
+          - architecture: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.architecture != 'android-arm64' && 'android-arm64' || 'none' }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Setup Java (required for Android)
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: '17'
+
+    - name: Install MAUI workload
+      run: |
+        dotnet workload install maui
+        dotnet workload install android
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Determine project files
+      id: project-files
+      run: |
+        if [ "${{ matrix.architecture }}" == "android-arm64" ]; then
+          echo "sdk_project=ICYOU.SDK/ICYOU.SDK.arm64.csproj" >> $GITHUB_OUTPUT
+          echo "core_project=ICYOU.Core/ICYOU.Core.arm64.csproj" >> $GITHUB_OUTPUT
+          echo "e2e_project=ICYOU.Modules.E2E/ICYOU.Modules.E2E.arm64.csproj" >> $GITHUB_OUTPUT
+          echo "quote_project=ICYOU.Modules.Quote/ICYOU.Modules.Quote.arm64.csproj" >> $GITHUB_OUTPUT
+          echo "preview_project=ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.arm64.csproj" >> $GITHUB_OUTPUT
+          echo "mobile_project=ICYOU.Mobile/ICYOU.Mobile.ARM64.csproj" >> $GITHUB_OUTPUT
+          echo "apk_name=ICYOU.Mobile-arm64.apk" >> $GITHUB_OUTPUT
+        else
+          echo "sdk_project=ICYOU.SDK/ICYOU.SDK.csproj" >> $GITHUB_OUTPUT
+          echo "core_project=ICYOU.Core/ICYOU.Core.csproj" >> $GITHUB_OUTPUT
+          echo "e2e_project=ICYOU.Modules.E2E/ICYOU.Modules.E2E.csproj" >> $GITHUB_OUTPUT
+          echo "quote_project=ICYOU.Modules.Quote/ICYOU.Modules.Quote.csproj" >> $GITHUB_OUTPUT
+          echo "preview_project=ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.csproj" >> $GITHUB_OUTPUT
+          echo "mobile_project=ICYOU.Mobile/ICYOU.Mobile.csproj" >> $GITHUB_OUTPUT
+          echo "apk_name=ICYOU.Mobile-x64.apk" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build ICYOU.SDK
+      run: dotnet build ${{ steps.project-files.outputs.sdk_project }} -c Release -f net10.0-android -r ${{ matrix.architecture }}
+
+    - name: Build ICYOU.Core
+      run: dotnet build ${{ steps.project-files.outputs.core_project }} -c Release -f net10.0-android -r ${{ matrix.architecture }}
+
+    - name: Build ICYOU.Modules.E2E
+      run: dotnet build ${{ steps.project-files.outputs.e2e_project }} -c Release -f net10.0-android -r ${{ matrix.architecture }}
+
+    - name: Build ICYOU.Modules.Quote
+      run: dotnet build ${{ steps.project-files.outputs.quote_project }} -c Release -f net10.0-android -r ${{ matrix.architecture }}
+
+    - name: Build ICYOU.Modules.LinkPreview
+      run: dotnet build ${{ steps.project-files.outputs.preview_project }} -c Release -f net10.0-android -r ${{ matrix.architecture }}
+
+    - name: Publish Android App
+      run: dotnet publish ${{ steps.project-files.outputs.mobile_project }} -c Release -f net10.0-android -r ${{ matrix.architecture }}
+
+    - name: Copy APK to build folder
+      run: |
+        mkdir -p build
+        find ICYOU.Mobile/bin/Release/net10.0-android/${{ matrix.architecture }}/publish -name "*.apk" -exec cp {} build/${{ steps.project-files.outputs.apk_name }} \;
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-${{ matrix.architecture }}-apk
+        path: build/*.apk
+        retention-days: 30
+
+    - name: Get APK info
+      run: |
+        echo "### Build Information" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
+        echo "**APK Size:** $(du -h build/${{ steps.project-files.outputs.apk_name }} | cut -f1)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Download artifact from Actions tab" >> $GITHUB_STEP_SUMMARY

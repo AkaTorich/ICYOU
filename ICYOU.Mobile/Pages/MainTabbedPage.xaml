@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:pages="clr-namespace:ICYOU.Mobile.Pages"
+            x:Class="ICYOU.Mobile.Pages.MainTabbedPage"
+            Title="ICYOU Messenger">
+
+    <pages:ChatsListPage Title="Чаты" IconImageSource="chat.png" />
+    <pages:FriendsPage Title="Друзья" IconImageSource="people.png" />
+    <pages:SettingsPage Title="Настройки" IconImageSource="settings.png" />
+
+</TabbedPage>

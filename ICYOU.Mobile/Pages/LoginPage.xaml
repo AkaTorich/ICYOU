@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ICYOU.Mobile.Pages.LoginPage"
+             Title="ICYOU - Вход"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+
+            <Label Text="ICYOU Messenger"
+                   FontSize="32"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   Margin="0,0,0,30" />
+
+            <Frame BorderColor="LightGray" Padding="20" HasShadow="True">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Подключение к серверу" FontSize="18" FontAttributes="Bold" />
+
+                    <Entry x:Name="ServerHost"
+                           Placeholder="IP адрес сервера"
+                           Text="5.11.83.122"
+                           TextColor="Black"
+                           PlaceholderColor="Gray" />
+
+                    <Entry x:Name="ServerPort"
+                           Placeholder="Порт"
+                           Text="7777"
+                           Keyboard="Numeric"
+                           TextColor="Black"
+                           PlaceholderColor="Gray" />
+
+                    <Label Text="Учетная запись" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0" />
+
+                    <Entry x:Name="Username"
+                           Placeholder="Логин"
+                           TextColor="Black"
+                           PlaceholderColor="Gray" />
+
+                    <Entry x:Name="Password"
+                           Placeholder="Пароль"
+                           IsPassword="True"
+                           TextColor="Black"
+                           PlaceholderColor="Gray" />
+
+                    <Label x:Name="ErrorText"
+                           TextColor="Red"
+                           IsVisible="False"
+                           FontSize="14" />
+
+                    <Button x:Name="LoginButton"
+                            Text="Войти"
+                            Clicked="OnLoginClicked"
+                            BackgroundColor="#4CAF50"
+                            TextColor="White"
+                            Margin="0,10,0,0" />
+
+                    <Button Text="Регистрация"
+                            Clicked="OnRegisterClicked"
+                            BackgroundColor="#FF9800"
+                            TextColor="White" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

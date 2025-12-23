@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ICYOU.Mobile.ViewModels"
+             x:Class="ICYOU.Mobile.Pages.ChatsListPage"
+             Title="Чаты">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Search Bar -->
+        <SearchBar x:Name="SearchBox"
+                   Grid.Row="0"
+                   Placeholder="Поиск чатов и друзей..."
+                   TextChanged="OnSearchTextChanged"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   Margin="10" />
+
+        <!-- Chats List -->
+        <CollectionView x:Name="ChatsList"
+                        Grid.Row="1"
+                        SelectionMode="Single"
+                        SelectionChanged="OnChatSelected">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ChatViewModel">
+                    <Grid Padding="10" ColumnDefinitions="50,*,Auto">
+
+                        <!-- Avatar -->
+                        <Frame Grid.Column="0"
+                               WidthRequest="50"
+                               HeightRequest="50"
+                               CornerRadius="25"
+                               Padding="0"
+                               HasShadow="False"
+                               BackgroundColor="{Binding StatusColor}">
+                            <Label Text="{Binding AvatarLetter}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
+                        </Frame>
+
+                        <!-- Chat Info -->
+                        <VerticalStackLayout Grid.Column="1" Padding="10,0" VerticalOptions="Center">
+                            <Label Text="{Binding DisplayName}"
+                                   FontSize="16"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding LastMessageText}"
+                                   FontSize="14"
+                                   TextColor="Gray"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+
+                        <!-- Time and Badge -->
+                        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End">
+                            <Label Text="{Binding LastMessageTime}"
+                                   FontSize="12"
+                                   TextColor="Gray" />
+                            <Frame IsVisible="{Binding HasUnread}"
+                                   BackgroundColor="#4CAF50"
+                                   CornerRadius="10"
+                                   Padding="5,2"
+                                   Margin="0,5,0,0"
+                                   HasShadow="False">
+                                <Label Text="{Binding UnreadCount}"
+                                       TextColor="White"
+                                       FontSize="12"
+                                       FontAttributes="Bold" />
+                            </Frame>
+                        </VerticalStackLayout>
+
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                    <Label Text="Нет чатов"
+                           FontSize="18"
+                           TextColor="Gray"
+                           HorizontalOptions="Center" />
+                    <Label Text="Добавьте друзей во вкладке 'Друзья'"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           Margin="0,10,0,0" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

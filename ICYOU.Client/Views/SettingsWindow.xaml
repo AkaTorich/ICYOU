@@ -1,0 +1,310 @@
+<Window x:Class="ICYOU.Client.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Настройки" 
+        Height="500" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundBrush}">
+    
+    <Border Background="{StaticResource SurfaceBrush}" 
+            CornerRadius="16" 
+            Margin="20"
+            Padding="20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Text="Настройки" 
+                       Style="{StaticResource HeaderStyle}"
+                       Margin="0,0,0,20"/>
+            
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Профиль -->
+                    <TextBlock Text="ПРОФИЛЬ" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15"
+                            Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Отображаемое имя" Style="{StaticResource LabelStyle}"/>
+                            <TextBox x:Name="DisplayNameBox" 
+                                     Style="{StaticResource ModernTextBox}"
+                                     Margin="0,0,0,15"/>
+                            
+                            <TextBlock Text="Статус" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox x:Name="StatusCombo" 
+                                      Margin="0,0,0,10"
+                                      Background="{StaticResource SurfaceBrush}"
+                                      Foreground="{StaticResource TextBrush}">
+                                <ComboBoxItem Content="В сети" Tag="Online"/>
+                                <ComboBoxItem Content="Отошёл" Tag="Away"/>
+                                <ComboBoxItem Content="Не беспокоить" Tag="DoNotDisturb"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Внешний вид -->
+                    <TextBlock Text="ВНЕШНИЙ ВИД" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15"
+                            Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Тема" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox x:Name="ThemeCombo" 
+                                      Margin="0,0,0,15"
+                                      Background="{StaticResource SurfaceBrush}"
+                                      Foreground="{StaticResource TextBrush}">
+                                <ComboBoxItem Content="Тёмная" Tag="Dark"/>
+                                <ComboBoxItem Content="Светлая" Tag="Light"/>
+                            </ComboBox>
+                            
+                            <TextBlock Text="Пак смайлов" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox x:Name="EmotePackCombo" 
+                                      Margin="0,0,0,10"
+                                      Background="{StaticResource SurfaceBrush}"
+                                      Foreground="{StaticResource TextBrush}"
+                                      SelectionChanged="EmotePackCombo_SelectionChanged"/>
+                            <TextBlock x:Name="EmotePackInfo"
+                                       Text="Паки находятся в папке emotes/"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Уведомления -->
+                    <TextBlock Text="УВЕДОМЛЕНИЯ" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15"
+                            Margin="0,0,0,20">
+                        <StackPanel>
+                            <CheckBox x:Name="NotifyMessagesCheck" 
+                                      Content="Уведомления о новых сообщениях"
+                                      Foreground="{StaticResource TextBrush}"
+                                      IsChecked="True"
+                                      Margin="0,0,0,10"/>
+                            <CheckBox x:Name="NotifySoundsCheck" 
+                                      Content="Звуковые уведомления"
+                                      Foreground="{StaticResource TextBrush}"
+                                      IsChecked="True"
+                                      Margin="0,0,0,10"/>
+                            <CheckBox x:Name="NotifyFriendsCheck" 
+                                      Content="Уведомления о друзьях онлайн"
+                                      Foreground="{StaticResource TextBrush}"
+                                      IsChecked="True"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Безопасность -->
+                    <TextBlock Text="БЕЗОПАСНОСТЬ" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15"
+                            Margin="0,0,0,20">
+                        <StackPanel>
+                            <CheckBox x:Name="DbEncryptionCheck" 
+                                      Content="Шифровать локальную базу сообщений"
+                                      Foreground="{StaticResource TextBrush}"
+                                      IsChecked="False"
+                                      Checked="DbEncryptionCheck_Changed"
+                                      Unchecked="DbEncryptionCheck_Changed"
+                                      Margin="0,0,0,10"/>
+                            
+                            <StackPanel x:Name="EncryptionPasswordPanel" Visibility="Collapsed">
+                                <TextBlock Text="Пароль шифрования" 
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="12"
+                                           Margin="0,0,0,5"/>
+                                <PasswordBox x:Name="EncryptionPasswordBox" 
+                                             Margin="0,0,0,10"
+                                             Background="{StaticResource SurfaceBrush}"
+                                             Foreground="{StaticResource TextBrush}"
+                                             BorderBrush="{StaticResource SurfaceBrush}"
+                                             Padding="10,8"/>
+                                <Button Content="Установить пароль" 
+                                        Style="{StaticResource PrimaryButton}"
+                                        Click="SetEncryptionPassword_Click"
+                                        Margin="0,0,0,5"
+                                        Padding="10,8"/>
+                                <TextBlock x:Name="EncryptionStatusText"
+                                           Text=""
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="11"/>
+                            </StackPanel>
+                            
+                            <Separator Margin="0,15,0,15" Background="{StaticResource SurfaceBrush}"/>
+                            
+                            <!-- Кэш и данные -->
+                            <TextBlock Text="Кэш и данные" 
+                                       Foreground="{StaticResource TextBrush}"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,10"/>
+                            
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Размер кэша:" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="12"/>
+                                    <TextBlock x:Name="CacheSizeText" 
+                                               Text="0 МБ" 
+                                               Foreground="{StaticResource TextBrush}"
+                                               FontSize="14"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" 
+                                        Content="Очистить кэш" 
+                                        Style="{StaticResource SecondaryButton}"
+                                        Click="ClearCache_Click"
+                                        Padding="15,8"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
+                            
+                            <Button Content="Удалить все данные" 
+                                    Click="ClearAllData_Click"
+                                    Padding="10,8"
+                                    Background="#D32F2F"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="6" 
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Подключение -->
+                    <TextBlock Text="ПОДКЛЮЧЕНИЕ" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15"
+                            Margin="0,0,0,20">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Сервер" 
+                                               Foreground="{StaticResource TextBrush}"
+                                               FontSize="14"/>
+                                    <TextBlock x:Name="ServerInfoText" 
+                                               Text="127.0.0.1:7777" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="12"/>
+                                </StackPanel>
+                                <Ellipse Grid.Column="1" 
+                                         Width="12" Height="12" 
+                                         Fill="{StaticResource OnlineBrush}"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Модули -->
+                    <TextBlock Text="МОДУЛИ" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15"
+                            Margin="0,0,0,20">
+                        <StackPanel x:Name="ModulesPanel">
+                            <TextBlock x:Name="NoModulesText"
+                                       Text="Модули не загружены"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontStyle="Italic"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- О программе -->
+                    <TextBlock Text="О ПРОГРАММЕ" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,10"/>
+                    
+                    <Border Background="{StaticResource CardBrush}" 
+                            CornerRadius="8" 
+                            Padding="15">
+                        <StackPanel>
+                            <TextBlock Text="ICYOU Messenger" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}"/>
+                            <TextBlock Text="Версия 1.0.0" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="UDP мессенджер с поддержкой модулей" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+            
+            <!-- Кнопки -->
+            <StackPanel Grid.Row="2" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        Margin="0,20,0,0">
+                <Button Content="Выйти из аккаунта" 
+                        Style="{StaticResource SecondaryButton}"
+                        Foreground="{StaticResource ErrorBrush}"
+                        BorderBrush="{StaticResource ErrorBrush}"
+                        Click="LogoutButton_Click"
+                        Margin="0,0,10,0"/>
+                <Button Content="Сохранить" 
+                        Style="{StaticResource PrimaryButton}"
+                        Click="SaveButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
+
