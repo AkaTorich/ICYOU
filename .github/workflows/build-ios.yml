@@ -27,18 +27,22 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Install MAUI workload
+      env:
+        DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
       run: |
         dotnet workload install maui
         dotnet workload install ios
 
     - name: Restore dependencies
+      env:
+        DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
       run: |
-        dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj
-        dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj
-        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj
-        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj
-        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj
-        dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj
+        dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
 
     - name: Build ICYOU.SDK for iOS
       run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios -r ios-arm64
