@@ -1,16 +1,16 @@
 name: Build iOS App
 
 on:
-  # Временно отключено для отладки Android
-  # push:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'ICYOU.Mobile/**'
-  #     - 'ICYOU.Core/**'
-  #     - 'ICYOU.SDK/**'
-  #     - 'ICYOU.Modules.*/**'
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ICYOU.Mobile/**'
+      - 'ICYOU.Core/**'
+      - 'ICYOU.SDK/**'
+      - 'ICYOU.Modules.*/**'
+      - '.github/workflows/build-ios.yml'
+  pull_request:
+    branches: [ main ]
   workflow_dispatch: # Можно запустить вручную
 
 jobs:
