@@ -49,32 +49,32 @@ jobs:
     - name: Build ICYOU.SDK for iOS
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
-      run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios16.1 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
+      run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios17.5 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
 
     - name: Build ICYOU.Core for iOS
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
-      run: dotnet build ICYOU.Core/ICYOU.Core.ios.csproj -c Release -f net8.0-ios16.1 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
+      run: dotnet build ICYOU.Core/ICYOU.Core.ios.csproj -c Release -f net8.0-ios17.5 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
 
     - name: Build ICYOU.Modules.E2E for iOS
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
-      run: dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj -c Release -f net8.0-ios16.1 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
+      run: dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj -c Release -f net8.0-ios17.5 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
 
     - name: Build ICYOU.Modules.Quote for iOS
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
-      run: dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj -c Release -f net8.0-ios16.1 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
+      run: dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj -c Release -f net8.0-ios17.5 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
 
     - name: Build ICYOU.Modules.LinkPreview for iOS
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
-      run: dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj -c Release -f net8.0-ios16.1 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
+      run: dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj -c Release -f net8.0-ios17.5 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
 
     - name: Build iOS App
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
-      run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios16.1 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
+      run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.5 -r ios-arm64 /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202
 
     # Для публикации IPA нужны сертификаты Apple Developer
     # - name: Publish iOS App
@@ -89,5 +89,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ios-build
-        path: ICYOU.Mobile/bin/Release/net8.0-ios16.1/ios-arm64/
+        path: ICYOU.Mobile/bin/Release/net8.0-ios17.5/ios-arm64/
         retention-days: 7

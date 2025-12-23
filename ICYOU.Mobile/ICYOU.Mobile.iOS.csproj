@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-ios16.1</TargetFrameworks>
+		<TargetFrameworks>net8.0-ios17.5</TargetFrameworks>
 
 		<!-- iOS физические устройства (iPhone/iPad) -->
 		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
@@ -46,11 +46,11 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 
 		<!-- Модули для динамической загрузки -->
-		<MauiAsset Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios16.1\**\ICYOU.Modules.E2E.dll"
+		<MauiAsset Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios17.5\**\ICYOU.Modules.E2E.dll"
 		            LogicalName="modules/ICYOU.Modules.E2E.dll" />
-		<MauiAsset Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios16.1\**\ICYOU.Modules.Quote.dll"
+		<MauiAsset Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios17.5\**\ICYOU.Modules.Quote.dll"
 		            LogicalName="modules/ICYOU.Modules.Quote.dll" />
-		<MauiAsset Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios16.1\**\ICYOU.Modules.LinkPreview.dll"
+		<MauiAsset Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios17.5\**\ICYOU.Modules.LinkPreview.dll"
 		            LogicalName="modules/ICYOU.Modules.LinkPreview.dll" />
 	</ItemGroup>
 
@@ -65,9 +65,9 @@
 
 	<!-- Копирование модулей в папку modules для динамической загрузки -->
 	<ItemGroup>
-		<ModuleDlls Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios16.1\**\ICYOU.Modules.E2E.dll" />
-		<ModuleDlls Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios16.1\**\ICYOU.Modules.Quote.dll" />
-		<ModuleDlls Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios16.1\**\ICYOU.Modules.LinkPreview.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios17.5\**\ICYOU.Modules.E2E.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios17.5\**\ICYOU.Modules.Quote.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios17.5\**\ICYOU.Modules.LinkPreview.dll" />
 	</ItemGroup>
 
 	<Target Name="CopyModules" AfterTargets="Build">
