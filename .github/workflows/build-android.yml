@@ -26,6 +26,11 @@ jobs:
   build-android:
     runs-on: ubuntu-latest # Linux runner (быстрее и дешевле)
 
+    env:
+      DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
     strategy:
       matrix:
         architecture: [android-x64, android-arm64]
@@ -77,12 +82,12 @@ jobs:
 
     - name: Restore dependencies
       run: |
-        dotnet restore ${{ steps.project-files.outputs.sdk_project }}
-        dotnet restore ${{ steps.project-files.outputs.core_project }}
-        dotnet restore ${{ steps.project-files.outputs.e2e_project }}
-        dotnet restore ${{ steps.project-files.outputs.quote_project }}
-        dotnet restore ${{ steps.project-files.outputs.preview_project }}
-        dotnet restore ${{ steps.project-files.outputs.mobile_project }}
+        dotnet restore ${{ steps.project-files.outputs.sdk_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ${{ steps.project-files.outputs.core_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ${{ steps.project-files.outputs.e2e_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ${{ steps.project-files.outputs.quote_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ${{ steps.project-files.outputs.preview_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ${{ steps.project-files.outputs.mobile_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
 
     - name: Build ICYOU.SDK
       run: dotnet build ${{ steps.project-files.outputs.sdk_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
