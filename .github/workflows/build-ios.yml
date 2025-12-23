@@ -36,13 +36,15 @@ jobs:
     - name: Restore dependencies
       env:
         DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
+        DOTNET_CLI_UI_LANGUAGE: en-US
+        MSBUILDDISABLENODEREUSE: 1
       run: |
-        dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
-        dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
-        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
-        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
-        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
-        dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202 || true
+        dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202 || true
+        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202 || true
+        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202 || true
+        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202 || true
+        dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0 /p:NoWarn=NETSDK1202 || true
 
     - name: Build ICYOU.SDK for iOS
       run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios -r ios-arm64
