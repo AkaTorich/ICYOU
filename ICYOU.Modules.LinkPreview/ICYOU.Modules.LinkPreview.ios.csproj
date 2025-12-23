@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
-    <SupportedOSPlatformVersion>1.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
