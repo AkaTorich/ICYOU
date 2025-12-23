@@ -32,7 +32,13 @@ jobs:
         dotnet workload install ios
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: |
+        dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj
+        dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj
+        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj
+        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj
+        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj
+        dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj
 
     - name: Build ICYOU.SDK for iOS
       run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios -r ios-arm64
