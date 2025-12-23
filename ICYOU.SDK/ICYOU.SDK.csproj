@@ -1,13 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0-android</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>CS1591</NoWarn>
-    <RuntimeIdentifier>android-x64</RuntimeIdentifier>
-    <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == '' AND '$(TargetFramework)' == 'net9.0-android'">C:\Users\psysh\AppData\Local\Android\Sdk</AndroidSdkDirectory>
   </PropertyGroup>
 
 </Project>

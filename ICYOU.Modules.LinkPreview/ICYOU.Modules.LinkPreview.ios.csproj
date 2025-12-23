@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
+    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
   </ItemGroup>
 

@@ -10,7 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
-  </ItemGroup>
+	<!-- Ссылка на общую библиотеку -->
+	<ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
+</ItemGroup>
 
 </Project>
