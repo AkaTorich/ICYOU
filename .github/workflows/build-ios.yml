@@ -1,16 +1,17 @@
 name: Build iOS App
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'ICYOU.Mobile/**'
-      - 'ICYOU.Core/**'
-      - 'ICYOU.SDK/**'
-      - 'ICYOU.Modules.*/**'
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch: # Позволяет запускать вручную
+  # Отключено: автоматический запуск при push
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'ICYOU.Mobile/**'
+  #     - 'ICYOU.Core/**'
+  #     - 'ICYOU.SDK/**'
+  #     - 'ICYOU.Modules.*/**'
+  # pull_request:
+  #   branches: [ main ]
+  workflow_dispatch: # Можно запустить вручную если нужно
 
 jobs:
   build-ios:
