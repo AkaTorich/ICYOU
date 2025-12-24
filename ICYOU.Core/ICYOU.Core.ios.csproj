@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-ios17.2</TargetFramework>
-    <TargetPlatformIdentifier>ios</TargetPlatformIdentifier>
-    <TargetPlatformVersion>17.2</TargetPlatformVersion>
+    <TargetFrameworks>net8.0;net9.0-ios</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
