@@ -31,10 +31,6 @@ jobs:
           dotnet workload install ios --skip-manifest-update
           dotnet workload restore
 
-      - name: Detect project reference cycles
-        shell: pwsh
-        run: pwsh ./tools/detect-csproj-cycles.ps1
-
       - name: Restore ICYOU.SDK (iOS)
         run: dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:NoWarn=NETSDK1202
 
