@@ -20,11 +20,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Remove global.json for iOS build
+        run: rm -f global.json
+
       - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.416'
-          
+
       - name: Confirm dotnet & Xcode
         run: |
           dotnet --version
