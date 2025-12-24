@@ -65,4 +65,4 @@ jobs:
         run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:NoWarn=NETSDK1202
 
       - name: Build Mobile App (iOS)
-        run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
+        run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202 /p:_RequireCodeSigning=false /p:CodesignKey="" /p:CodesignProvision=""
