@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-14
+    runs-on: macos-latest
 
     env:
       # Отключение подписи для CI сборки
@@ -28,6 +28,13 @@ jobs:
         with:
           dotnet-version: '8.0.416'
 
+      - name: Force use of .NET 8 SDK only
+        run: |
+          echo "DOTNET_ROOT=${{ env.DOTNET_ROOT }}" >> $GITHUB_ENV
+          echo "DOTNET_MULTILEVEL_LOOKUP=0" >> $GITHUB_ENV
+          dotnet --version
+          dotnet --list-sdks
+
       - name: Confirm dotnet & Xcode
         run: |
           dotnet --version
@@ -46,31 +53,31 @@ jobs:
         run: dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:NoWarn=NETSDK1202
 
       - name: Build ICYOU.SDK (iOS)
-        run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios -r ios-arm64 /p:NoWarn=NETSDK1202
+        run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
 
       - name: Restore ICYOU.Core (iOS)
         run: dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj /p:NoWarn=NETSDK1202
 
       - name: Build ICYOU.Core (iOS)
-        run: dotnet build ICYOU.Core/ICYOU.Core.ios.csproj -c Release -f net8.0-ios -r ios-arm64 /p:NoWarn=NETSDK1202
+        run: dotnet build ICYOU.Core/ICYOU.Core.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
 
       - name: Restore Modules.E2E (iOS)
         run: dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj /p:NoWarn=NETSDK1202
 
       - name: Build Modules.E2E (iOS)
-        run: dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj -c Release -f net8.0-ios -r ios-arm64 /p:NoWarn=NETSDK1202
+        run: dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
 
       - name: Restore Modules.Quote (iOS)
         run: dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj /p:NoWarn=NETSDK1202
 
       - name: Build Modules.Quote (iOS)
-        run: dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj -c Release -f net8.0-ios -r ios-arm64 /p:NoWarn=NETSDK1202
+        run: dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
 
       - name: Restore Modules.LinkPreview (iOS)
         run: dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj /p:NoWarn=NETSDK1202
 
       - name: Build Modules.LinkPreview (iOS)
-        run: dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj -c Release -f net8.0-ios -r ios-arm64 /p:NoWarn=NETSDK1202
+        run: dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
 
       - name: Restore Mobile App (iOS)
         run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:NoWarn=NETSDK1202
@@ -79,7 +86,7 @@ jobs:
         run: |
           dotnet publish ICYOU.Mobile/ICYOU.Mobile.iOS.csproj \
             -c Release \
-            -f net8.0-ios \
+            -f net8.0-ios17.2 \
             -r ios-arm64 \
             /p:NoWarn=NETSDK1202 \
             /p:_RequireCodeSigning=false \
@@ -93,9 +100,9 @@ jobs:
       - name: Find and rename IPA
         run: |
           echo "Searching for IPA file..."
-          find ICYOU.Mobile/bin/Release/net8.0-ios/ios-arm64/publish -name "*.ipa" -type f
+          find ICYOU.Mobile/bin/Release/net8.0-ios17.2/ios-arm64/publish -name "*.ipa" -type f
 
-          IPA_FILE=$(find ICYOU.Mobile/bin/Release/net8.0-ios/ios-arm64/publish -name "*.ipa" -type f | head -n 1)
+          IPA_FILE=$(find ICYOU.Mobile/bin/Release/net8.0-ios17.2/ios-arm64/publish -name "*.ipa" -type f | head -n 1)
 
           if [ -n "$IPA_FILE" ]; then
             mkdir -p artifacts
@@ -104,7 +111,7 @@ jobs:
             ls -lh artifacts/ICYOU-unsigned.ipa
           else
             echo "⚠️ No IPA file found, checking APP bundle..."
-            APP_FILE=$(find ICYOU.Mobile/bin/Release/net8.0-ios/ios-arm64/publish -name "*.app" -type d | head -n 1)
+            APP_FILE=$(find ICYOU.Mobile/bin/Release/net8.0-ios17.2/ios-arm64/publish -name "*.app" -type d | head -n 1)
             if [ -n "$APP_FILE" ]; then
               echo "Found APP bundle: $APP_FILE"
               mkdir -p Payload
