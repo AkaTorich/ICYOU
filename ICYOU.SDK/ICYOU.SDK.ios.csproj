@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0-ios17.2</TargetFramework>
+    <TargetPlatformIdentifier>ios</TargetPlatformIdentifier>
     <TargetPlatformVersion>17.2</TargetPlatformVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
