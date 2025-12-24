@@ -1,17 +1,16 @@
 name: Build Android App
 
 on:
-  # Временно отключено
-  # push:
-  #   branches: [ main, develop ]
-  #   paths:
-  #     - 'ICYOU.Mobile/**'
-  #     - 'ICYOU.Core/**'
-  #     - 'ICYOU.SDK/**'
-  #     - 'ICYOU.Modules.*/**'
-  #     - '.github/workflows/build-android.yml'
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ICYOU.Mobile/**'
+      - 'ICYOU.Core/**'
+      - 'ICYOU.SDK/**'
+      - 'ICYOU.Modules.*/**'
+      - '.github/workflows/build-android.yml'
+  pull_request:
+    branches: [ main ]
   workflow_dispatch: # Позволяет запускать вручную
     inputs:
       architecture:
