@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
+    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.x64.csproj" />
   </ItemGroup>
 
 </Project>
