@@ -2,11 +2,10 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-ios17.2</TargetFramework>
-		<TargetPlatformIdentifier>iPhoneOS</TargetPlatformIdentifier>
+		<TargetPlatformIdentifier>ios</TargetPlatformIdentifier>
 		<TargetPlatformVersion>17.2</TargetPlatformVersion>
 		<SupportedOSPlatformVersion>17.2</SupportedOSPlatformVersion>
 
-		<!-- iOS физические устройства (iPhone/iPad) -->
 		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 
 		<OutputType>Exe</OutputType>
@@ -16,17 +15,11 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- AOT обязательен для iOS -->
 		<PublishTrimmed>true</PublishTrimmed>
 		<RunAOTCompilation>true</RunAOTCompilation>
 
-		<!-- Display name -->
 		<ApplicationTitle>ICYOU.Mobile</ApplicationTitle>
-
-		<!-- App Identifier -->
 		<ApplicationId>com.companyname.icyou.mobile</ApplicationId>
-
-		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 	</PropertyGroup>

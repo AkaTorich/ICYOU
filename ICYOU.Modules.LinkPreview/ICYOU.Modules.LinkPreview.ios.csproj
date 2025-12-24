@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-ios17.2</TargetFramework>
-		<TargetPlatformIdentifier>iPhoneOS</TargetPlatformIdentifier>
+		<TargetPlatformIdentifier>ios</TargetPlatformIdentifier>
 		<TargetPlatformVersion>17.2</TargetPlatformVersion>
 		<SupportedOSPlatformVersion>17.2</SupportedOSPlatformVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
