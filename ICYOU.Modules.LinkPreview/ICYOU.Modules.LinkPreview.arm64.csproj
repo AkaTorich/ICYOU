@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
     <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == '' AND '$(TargetFramework)' == 'net9.0-android'">C:\Users\psysh\AppData\Local\Android\Sdk</AndroidSdkDirectory>
   </PropertyGroup>
 

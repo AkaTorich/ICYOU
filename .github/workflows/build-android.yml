@@ -56,16 +56,8 @@ jobs:
 
     - name: Install MAUI workload
       run: |
-        dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
         dotnet workload install android --source https://api.nuget.org/v3/index.json
-
-    - name: Verify workload installation
-      run: |
-        echo "Installed workloads:"
-        dotnet workload list
-        echo ""
-        echo "SDK info:"
-        dotnet --info
+        dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
 
     - name: Determine project files
       id: project-files
@@ -79,7 +71,7 @@ jobs:
           echo "mobile_project=ICYOU.Mobile/ICYOU.Mobile.ARM64.csproj" >> $GITHUB_OUTPUT
           echo "apk_name=ICYOU.Mobile-arm64.apk" >> $GITHUB_OUTPUT
         else
-          echo "sdk_project=ICYOU.SDK/ICYOU.SDK.x64.csproj" >> $GITHUB_OUTPUT
+          echo "sdk_project=ICYOU.SDK/ICYOU.SDK.csproj" >> $GITHUB_OUTPUT
           echo "core_project=ICYOU.Core/ICYOU.Core.csproj" >> $GITHUB_OUTPUT
           echo "e2e_project=ICYOU.Modules.E2E/ICYOU.Modules.E2E.csproj" >> $GITHUB_OUTPUT
           echo "quote_project=ICYOU.Modules.Quote/ICYOU.Modules.Quote.csproj" >> $GITHUB_OUTPUT
