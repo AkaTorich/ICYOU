@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
+    <TargetFrameworks>net9.0-android</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RuntimeIdentifier>android-x64</RuntimeIdentifier>
-    <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == '' AND '$(TargetFramework)' == 'net9.0-android'">C:\Users\psysh\AppData\Local\Android\Sdk</AndroidSdkDirectory>
+    <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == ''">C:\Users\psysh\AppData\Local\Android\Sdk</AndroidSdkDirectory>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
+    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
   </ItemGroup>
 
 </Project>

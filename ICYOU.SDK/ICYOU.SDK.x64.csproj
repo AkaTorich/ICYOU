@@ -4,13 +4,10 @@
     <TargetFrameworks>net9.0-android</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
     <RuntimeIdentifier>android-x64</RuntimeIdentifier>
     <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == ''">C:\Users\psysh\AppData\Local\Android\Sdk</AndroidSdkDirectory>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
-  </ItemGroup>
-
 </Project>
-
