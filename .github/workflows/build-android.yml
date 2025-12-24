@@ -46,7 +46,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Setup Java (required for Android)
       uses: actions/setup-java@v4
@@ -99,27 +99,27 @@ jobs:
         dotnet restore ${{ steps.project-files.outputs.mobile_project }} /p:TreatWarningsAsErrors=false /p:WarningLevel=0
 
     - name: Build ICYOU.SDK
-      run: dotnet build ${{ steps.project-files.outputs.sdk_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
+      run: dotnet build ${{ steps.project-files.outputs.sdk_project }} -c Release -f net9.0-android -r ${{ matrix.architecture }}
 
     - name: Build ICYOU.Core
-      run: dotnet build ${{ steps.project-files.outputs.core_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
+      run: dotnet build ${{ steps.project-files.outputs.core_project }} -c Release -f net9.0-android -r ${{ matrix.architecture }}
 
     - name: Build ICYOU.Modules.E2E
-      run: dotnet build ${{ steps.project-files.outputs.e2e_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
+      run: dotnet build ${{ steps.project-files.outputs.e2e_project }} -c Release -f net9.0-android -r ${{ matrix.architecture }}
 
     - name: Build ICYOU.Modules.Quote
-      run: dotnet build ${{ steps.project-files.outputs.quote_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
+      run: dotnet build ${{ steps.project-files.outputs.quote_project }} -c Release -f net9.0-android -r ${{ matrix.architecture }}
 
     - name: Build ICYOU.Modules.LinkPreview
-      run: dotnet build ${{ steps.project-files.outputs.preview_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
+      run: dotnet build ${{ steps.project-files.outputs.preview_project }} -c Release -f net9.0-android -r ${{ matrix.architecture }}
 
     - name: Publish Android App
-      run: dotnet publish ${{ steps.project-files.outputs.mobile_project }} -c Release -f net8.0-android -r ${{ matrix.architecture }}
+      run: dotnet publish ${{ steps.project-files.outputs.mobile_project }} -c Release -f net9.0-android -r ${{ matrix.architecture }}
 
     - name: Copy APK to build folder
       run: |
         mkdir -p build
-        find ICYOU.Mobile/bin/Release/net8.0-android/${{ matrix.architecture }}/publish -name "*.apk" -exec cp {} build/${{ steps.project-files.outputs.apk_name }} \;
+        find ICYOU.Mobile/bin/Release/net9.0-android/${{ matrix.architecture }}/publish -name "*.apk" -exec cp {} build/${{ steps.project-files.outputs.apk_name }} \;
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
