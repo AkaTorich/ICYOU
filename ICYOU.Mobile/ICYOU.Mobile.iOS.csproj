@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0-ios16.0</TargetFramework>
+		<TargetFramework>net8.0-ios</TargetFramework>
 
 		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 
@@ -39,11 +39,11 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 
 		<!-- Модули для динамической загрузки -->
-		<MauiAsset Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios16.0\**\ICYOU.Modules.E2E.dll"
+		<MauiAsset Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios\**\ICYOU.Modules.E2E.dll"
 					LogicalName="modules/ICYOU.Modules.E2E.dll" />
-		<MauiAsset Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios16.0\**\ICYOU.Modules.Quote.dll"
+		<MauiAsset Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios\**\ICYOU.Modules.Quote.dll"
 					LogicalName="modules/ICYOU.Modules.Quote.dll" />
-		<MauiAsset Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios16.0\**\ICYOU.Modules.LinkPreview.dll"
+		<MauiAsset Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios\**\ICYOU.Modules.LinkPreview.dll"
 					LogicalName="modules/ICYOU.Modules.LinkPreview.dll" />
 	</ItemGroup>
 
@@ -58,9 +58,9 @@
 
 	<!-- Копирование модулей в папку modules -->
 	<ItemGroup>
-		<ModuleDlls Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios16.0\**\ICYOU.Modules.E2E.dll" />
-		<ModuleDlls Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios16.0\**\ICYOU.Modules.Quote.dll" />
-		<ModuleDlls Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios16.0\**\ICYOU.Modules.LinkPreview.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios\**\ICYOU.Modules.E2E.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios\**\ICYOU.Modules.Quote.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios\**\ICYOU.Modules.LinkPreview.dll" />
 	</ItemGroup>
 
 	<Target Name="CopyModules" AfterTargets="Build">
