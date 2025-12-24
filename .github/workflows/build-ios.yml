@@ -20,18 +20,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Remove global.json for iOS build
-        run: rm -f global.json
-
       - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.416'
 
-      - name: Force use of .NET 8 SDK only
+      - name: Create global.json to pin SDK 8.0.416
         run: |
-          echo "DOTNET_ROOT=${{ env.DOTNET_ROOT }}" >> $GITHUB_ENV
-          echo "DOTNET_MULTILEVEL_LOOKUP=0" >> $GITHUB_ENV
+          echo '{
+            "sdk": {
+              "version": "8.0.416",
+              "rollForward": "disable"
+            }
+          }' > global.json
+          cat global.json
           dotnet --version
           dotnet --list-sdks
 
