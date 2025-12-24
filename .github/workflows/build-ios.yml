@@ -28,8 +28,8 @@ jobs:
           dotnet workload install ios --skip-manifest-update
           dotnet workload restore
 
-      - name: Restore
-        run: dotnet restore /p:NoWarn=NETSDK1202
+      - name: Restore iOS project
+        run: dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:NoWarn=NETSDK1202
 
       - name: Build iOS
         run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
