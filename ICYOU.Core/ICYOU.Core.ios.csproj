@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-ios17.2</TargetFramework>
+    <TargetFramework>net8.0-ios16.0</TargetFramework>
     <TargetPlatformIdentifier>ios</TargetPlatformIdentifier>
-    <TargetPlatformVersion>17.2</TargetPlatformVersion>
+    <TargetPlatformVersion>16.0</TargetPlatformVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
