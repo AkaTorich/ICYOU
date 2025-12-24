@@ -8,6 +8,13 @@ jobs:
   build-ios:
     runs-on: macos-latest
 
+    env:
+      # Отключение подписи для CI сборки
+      _RequireCodeSigning: false
+      CodesignKey: ""
+      CodesignProvision: ""
+      EnableCodeSigning: false
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -64,5 +71,11 @@ jobs:
       - name: Restore Mobile App (iOS)
         run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:NoWarn=NETSDK1202
 
-      - name: Build Mobile App (iOS)
-        run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202 /p:_RequireCodeSigning=false /p:CodesignKey="" /p:CodesignProvision=""
+      - name: Build Mobile App (iOS) - unsigned for CI
+        run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202 /p:_RequireCodeSigning=false /p:CodesignKey="" /p:CodesignProvision="" /p:EnableCodeSigning=false /p:IpaPackageDir=""
+
+      - name: Build Summary
+        run: |
+          echo "✅ iOS build completed successfully (unsigned, compilation check only)"
+          echo "⚠️  This build cannot be installed on real devices without Apple Developer certificates"
+          echo "📱 For installation: users need to build locally with their own Apple ID"
