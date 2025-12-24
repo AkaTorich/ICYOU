@@ -1,89 +1,83 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
+	<PropertyGroup>
+		<TargetFramework>net8.0-ios17.2</TargetFramework>
+		<TargetPlatformIdentifier>iPhoneOS</TargetPlatformIdentifier>
+		<TargetPlatformVersion>17.2</TargetPlatformVersion>
+		<SupportedOSPlatformVersion>17.2</SupportedOSPlatformVersion>
 
-    <!-- iOS физические устройства (iPhone/iPad) -->
-    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+		<!-- iOS физические устройства (iPhone/iPad) -->
+		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ICYOU.Mobile</RootNamespace>
-    <UseMaui>true</UseMaui>
-    <SingleProject>true</SingleProject>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>ICYOU.Mobile</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <!-- AOT обязательен для iOS -->
-    <PublishTrimmed>true</PublishTrimmed>
-    <RunAOTCompilation>true</RunAOTCompilation>
+		<!-- AOT обязательен для iOS -->
+		<PublishTrimmed>true</PublishTrimmed>
+		<RunAOTCompilation>true</RunAOTCompilation>
 
-    <!-- Display name -->
-    <ApplicationTitle>ICYOU.Mobile</ApplicationTitle>
+		<!-- Display name -->
+		<ApplicationTitle>ICYOU.Mobile</ApplicationTitle>
 
-    <!-- App Identifier -->
-    <ApplicationId>com.companyname.icyou.mobile</ApplicationId>
+		<!-- App Identifier -->
+		<ApplicationId>com.companyname.icyou.mobile</ApplicationId>
 
-    <!-- Versions -->
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+	</PropertyGroup>
 
-    <!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
-  </PropertyGroup>
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 
-  <ItemGroup>
-    <!-- App Icon -->
-    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
-    <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
-    <!-- Images -->
-    <MauiImage Include="Resources\Images\*" />
-    <MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
 
-    <!-- Custom Fonts -->
-    <MauiFont Include="Resources\Fonts\*" />
+		<!-- Raw Assets -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 
-    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<!-- Модули для динамической загрузки -->
+		<MauiAsset Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.E2E.dll"
+					LogicalName="modules/ICYOU.Modules.E2E.dll" />
+		<MauiAsset Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.Quote.dll"
+					LogicalName="modules/ICYOU.Modules.Quote.dll" />
+		<MauiAsset Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.LinkPreview.dll"
+					LogicalName="modules/ICYOU.Modules.LinkPreview.dll" />
+	</ItemGroup>
 
-    <!-- Модули для динамической загрузки -->
-    <MauiAsset Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.E2E.dll"
-                LogicalName="modules/ICYOU.Modules.E2E.dll" />
-    <MauiAsset Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.Quote.dll"
-                LogicalName="modules/ICYOU.Modules.Quote.dll" />
-    <MauiAsset Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.LinkPreview.dll"
-                LogicalName="modules/ICYOU.Modules.LinkPreview.dll" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.90" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.90" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ICYOU.Core\ICYOU.Core.ios.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ICYOU.Core\ICYOU.Core.ios.csproj" />
-  </ItemGroup>
+	<!-- Копирование модулей в папку modules -->
+	<ItemGroup>
+		<ModuleDlls Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.E2E.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.Quote.dll" />
+		<ModuleDlls Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.LinkPreview.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Some.Library\Some.Library.ios.csproj"
-                      Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
-  </ItemGroup>
-
-  <!-- Копирование модулей в папку modules для динамической загрузки -->
-  <ItemGroup>
-    <ModuleDlls Include="..\ICYOU.Modules.E2E\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.E2E.dll" />
-    <ModuleDlls Include="..\ICYOU.Modules.Quote\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.Quote.dll" />
-    <ModuleDlls Include="..\ICYOU.Modules.LinkPreview\bin\$(Configuration)\net8.0-ios17.2\**\ICYOU.Modules.LinkPreview.dll" />
-  </ItemGroup>
-
-  <Target Name="CopyModules" AfterTargets="Build">
-    <MakeDir Directories="$(OutputPath)modules" Condition="!Exists('$(OutputPath)modules')" />
-    <Copy SourceFiles="@(ModuleDlls)"
-          DestinationFolder="$(OutputPath)modules"
-          SkipUnchangedFiles="true" />
-  </Target>
+	<Target Name="CopyModules" AfterTargets="Build">
+		<MakeDir Directories="$(OutputPath)modules" Condition="!Exists('$(OutputPath)modules')" />
+		<Copy SourceFiles="@(ModuleDlls)"
+			  DestinationFolder="$(OutputPath)modules"
+			  SkipUnchangedFiles="true" />
+	</Target>
 
 </Project>

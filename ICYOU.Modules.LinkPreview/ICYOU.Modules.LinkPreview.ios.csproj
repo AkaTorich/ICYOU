@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
+		<TargetFramework>net8.0-ios17.2</TargetFramework>
+		<TargetPlatformIdentifier>iPhoneOS</TargetPlatformIdentifier>
+		<TargetPlatformVersion>17.2</TargetPlatformVersion>
+		<SupportedOSPlatformVersion>17.2</SupportedOSPlatformVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		<!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
-		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
