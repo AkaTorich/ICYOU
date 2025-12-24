@@ -12,17 +12,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up .NET
+      - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '8.0.416'
 
-      - name: "Diagnostics: SDKs & Xcode"
+      - name: Diagnostics SDKs and Xcode
         run: |
           dotnet --info
           dotnet --list-sdks
           xcodebuild -version || true
           xcrun -sdk iphoneos --show-sdk-version || true
+          dotnet workload list || true
 
       - name: Install MAUI / iOS workloads
         run: |
