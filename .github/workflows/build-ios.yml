@@ -17,13 +17,10 @@ jobs:
         with:
           dotnet-version: '8.0.416'
 
-      - name: Diagnostics SDKs and Xcode
+      - name: Confirm dotnet
         run: |
-          dotnet --info
+          dotnet --version
           dotnet --list-sdks
-          xcodebuild -version || true
-          xcrun -sdk iphoneos --show-sdk-version || true
-          dotnet workload list || true
 
       - name: Install MAUI / iOS workloads
         run: |
