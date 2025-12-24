@@ -2,7 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-ios16.0</TargetFramework>
-		<TargetPlatformVersion>16.0</TargetPlatformVersion>
 
 		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 

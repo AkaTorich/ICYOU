@@ -2,8 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-ios16.0</TargetFramework>
-		<TargetPlatformIdentifier>ios</TargetPlatformIdentifier>
-		<TargetPlatformVersion>16.0</TargetPlatformVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
