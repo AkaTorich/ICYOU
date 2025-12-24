@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0-android</TargetFrameworks>
+    <TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RuntimeIdentifier>android-x64</RuntimeIdentifier>
@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
+    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
   </ItemGroup>
 
 </Project>

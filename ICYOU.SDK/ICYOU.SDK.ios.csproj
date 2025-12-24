@@ -1,24 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>CS1591</NoWarn>
-    <!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0-ios17.2</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>CS1591</NoWarn>
+		<!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
+		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
+	</PropertyGroup>
 
 </Project>
 

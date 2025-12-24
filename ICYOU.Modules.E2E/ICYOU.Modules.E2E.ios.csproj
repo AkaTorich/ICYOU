@@ -10,8 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- Ссылка на общую кросс‑платформенную библиотеку -->
-		<ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
+		<ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
 	</ItemGroup>
 
 </Project>

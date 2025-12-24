@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0-ios17.2</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<!-- Для любых TFM, где GetTargetPlatformIdentifier вернёт 'ios' -->
+		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</TargetPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.2</SupportedOSPlatformVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.csproj" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ICYOU.SDK\ICYOU.SDK.ios.csproj" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
+	</ItemGroup>
 
 </Project>
