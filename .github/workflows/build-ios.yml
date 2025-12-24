@@ -1,20 +1,26 @@
 name: Build iOS
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   build-ios:
     runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '8.0.x'
 
-      - name: Show Xcode & iOS SDK
+      - name: "Diagnostics: SDKs & Xcode"
         run: |
+          dotnet --info
+          dotnet --list-sdks
           xcodebuild -version || true
           xcrun -sdk iphoneos --show-sdk-version || true
 
@@ -22,9 +28,10 @@ jobs:
         run: |
           dotnet workload install maui --skip-manifest-update
           dotnet workload install ios --skip-manifest-update
+          dotnet workload restore
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore /p:NoWarn=NETSDK1202
 
       - name: Build iOS
-        run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64
+        run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
