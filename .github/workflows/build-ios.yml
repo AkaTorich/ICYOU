@@ -17,10 +17,13 @@ jobs:
         with:
           dotnet-version: '8.0.416'
 
-      - name: Confirm dotnet
+      - name: Confirm dotnet & Xcode
         run: |
           dotnet --version
           dotnet --list-sdks
+          xcodebuild -version || true
+          xcrun -sdk iphoneos --show-sdk-version || true
+          dotnet workload list || true
 
       - name: Install MAUI / iOS workloads
         run: |
@@ -28,8 +31,42 @@ jobs:
           dotnet workload install ios --skip-manifest-update
           dotnet workload restore
 
-      - name: Restore iOS project
+      - name: Detect project reference cycles
+        shell: pwsh
+        run: pwsh ./tools/detect-csproj-cycles.ps1
+
+      - name: Restore ICYOU.SDK (iOS)
         run: dotnet restore ICYOU.SDK/ICYOU.SDK.ios.csproj /p:NoWarn=NETSDK1202
 
-      - name: Build iOS
+      - name: Build ICYOU.SDK (iOS)
         run: dotnet build ICYOU.SDK/ICYOU.SDK.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
+
+      - name: Restore ICYOU.Core (iOS)
+        run: dotnet restore ICYOU.Core/ICYOU.Core.ios.csproj /p:NoWarn=NETSDK1202
+
+      - name: Build ICYOU.Core (iOS)
+        run: dotnet build ICYOU.Core/ICYOU.Core.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
+
+      - name: Restore Modules.E2E (iOS)
+        run: dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj /p:NoWarn=NETSDK1202
+
+      - name: Build Modules.E2E (iOS)
+        run: dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
+
+      - name: Restore Modules.Quote (iOS)
+        run: dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj /p:NoWarn=NETSDK1202
+
+      - name: Build Modules.Quote (iOS)
+        run: dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
+
+      - name: Restore Modules.LinkPreview (iOS)
+        run: dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj /p:NoWarn=NETSDK1202
+
+      - name: Build Modules.LinkPreview (iOS)
+        run: dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.ios.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
+
+      - name: Restore Mobile App (iOS)
+        run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:NoWarn=NETSDK1202
+
+      - name: Build Mobile App (iOS)
+        run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202
