@@ -71,11 +71,68 @@ jobs:
       - name: Restore Mobile App (iOS)
         run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.iOS.csproj /p:NoWarn=NETSDK1202
 
-      - name: Build Mobile App (iOS) - unsigned for CI
-        run: dotnet build ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net8.0-ios17.2 -r ios-arm64 /p:NoWarn=NETSDK1202 /p:_RequireCodeSigning=false /p:CodesignKey="" /p:CodesignProvision="" /p:EnableCodeSigning=false /p:IpaPackageDir=""
+      - name: Publish iOS App (unsigned IPA)
+        run: |
+          dotnet publish ICYOU.Mobile/ICYOU.Mobile.iOS.csproj \
+            -c Release \
+            -f net8.0-ios17.2 \
+            -r ios-arm64 \
+            /p:NoWarn=NETSDK1202 \
+            /p:_RequireCodeSigning=false \
+            /p:CodesignKey="" \
+            /p:CodesignProvision="" \
+            /p:EnableCodeSigning=false \
+            /p:BuildIpa=true \
+            /p:IpaPackageDir="$(Build.ArtifactStagingDirectory)" \
+            /p:ArchiveOnBuild=true
+
+      - name: Find and rename IPA
+        run: |
+          echo "Searching for IPA file..."
+          find ICYOU.Mobile/bin/Release/net8.0-ios17.2/ios-arm64/publish -name "*.ipa" -type f
+
+          IPA_FILE=$(find ICYOU.Mobile/bin/Release/net8.0-ios17.2/ios-arm64/publish -name "*.ipa" -type f | head -n 1)
+
+          if [ -n "$IPA_FILE" ]; then
+            mkdir -p artifacts
+            cp "$IPA_FILE" artifacts/ICYOU-unsigned.ipa
+            echo "✅ IPA file created: artifacts/ICYOU-unsigned.ipa"
+            ls -lh artifacts/ICYOU-unsigned.ipa
+          else
+            echo "⚠️ No IPA file found, checking APP bundle..."
+            APP_FILE=$(find ICYOU.Mobile/bin/Release/net8.0-ios17.2/ios-arm64/publish -name "*.app" -type d | head -n 1)
+            if [ -n "$APP_FILE" ]; then
+              echo "Found APP bundle: $APP_FILE"
+              mkdir -p Payload
+              cp -r "$APP_FILE" Payload/
+              cd Payload && zip -r ../artifacts/ICYOU-unsigned.ipa . && cd ..
+              rm -rf Payload
+              echo "✅ IPA created from APP bundle: artifacts/ICYOU-unsigned.ipa"
+              ls -lh artifacts/ICYOU-unsigned.ipa
+            else
+              echo "❌ No IPA or APP found!"
+              exit 1
+            fi
+          fi
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ICYOU-iOS-unsigned
+          path: artifacts/ICYOU-unsigned.ipa
+          retention-days: 90
 
       - name: Build Summary
         run: |
-          echo "✅ iOS build completed successfully (unsigned, compilation check only)"
-          echo "⚠️  This build cannot be installed on real devices without Apple Developer certificates"
-          echo "📱 For installation: users need to build locally with their own Apple ID"
+          echo "### ✅ iOS Build Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Unsigned IPA file created for AltStore installation**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Download:** Go to Actions tab → Artifacts → ICYOU-iOS-unsigned" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📱 **Installation methods:**" >> $GITHUB_STEP_SUMMARY
+          echo "- **AltStore** (recommended): No Mac needed, auto-refresh every 7 days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sideloadly**: Windows/Mac tool for sideloading" >> $GITHUB_STEP_SUMMARY
+          echo "- **Xcode**: Build from source with your Apple ID" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Note:** Free provisioning certificates expire every 7 days" >> $GITHUB_STEP_SUMMARY

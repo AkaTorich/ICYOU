@@ -97,11 +97,13 @@ dotnet publish ICYOU.Mobile/ICYOU.Mobile.iOS.csproj -c Release -f net10.0-ios -r
 1. Откройте вкладку [Actions](../../actions)
 2. Выберите последний успешный workflow
 3. Скачайте артефакты:
-   - `android-x64-apk` - для эмулятора
-   - `android-arm64-apk` - для телефона
-   - `ios-build` - для iPhone
+   - `android-x64-apk` - Android для эмулятора
+   - `android-arm64-apk` - Android для телефона
+   - `ICYOU-iOS-unsigned` - iOS неподписанный IPA (для AltStore/Sideloadly)
 
-**Подробнее:** см. [CLOUD-BUILD-GUIDE.md](CLOUD-BUILD-GUIDE.md)
+**Подробнее:**
+- Android: см. [CLOUD-BUILD-GUIDE.md](CLOUD-BUILD-GUIDE.md)
+- iOS: см. [BUILD_IOS.md](BUILD_IOS.md) - установка через AltStore
 
 ## 📦 Установка
 
@@ -119,16 +121,33 @@ adb install -r build/ICYOU.Mobile-arm64.apk
 
 ### iOS
 
-#### Через Xcode:
-1. Подключите iPhone/iPad
+#### 🌟 Рекомендуется: AltStore (бесплатно, без Mac)
+
+1. **Установите AltStore** на iPhone: https://altstore.io/
+2. **Скачайте IPA** из [GitHub Actions](../../actions) (артефакт `ICYOU-iOS-unsigned`)
+3. **Откройте IPA** через Safari → "Open in AltStore"
+4. **Готово!** Приложение установлено
+
+✅ Автоматическое обновление подписи каждые 7 дней
+✅ Работает на Windows/Mac/Linux
+✅ Не требует Apple Developer ($99/год)
+
+#### Альтернативы:
+
+**Через Sideloadly** (Windows/Mac):
+- Скачать: https://sideloadly.io/
+- Установка аналогична AltStore, но без автообновления
+
+**Через Xcode** (только macOS):
+1. Подключите iPhone к Mac
 2. Window → Devices and Simulators
 3. Перетащите IPA на устройство
 
-#### Через TestFlight:
+**Через TestFlight** (требуется Apple Developer $99/год):
 1. Загрузите IPA в App Store Connect
 2. Пригласите тестировщиков
 
-**Подробнее:** см. [BUILD-iOS-README.md](BUILD-iOS-README.md)
+**📖 Подробная инструкция:** [BUILD_IOS.md](BUILD_IOS.md)
 
 ## 🛠️ Разработка
 
