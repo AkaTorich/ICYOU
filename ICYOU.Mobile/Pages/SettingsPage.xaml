@@ -46,6 +46,81 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Modules Section -->
+            <Frame BorderColor="LightGray" Padding="15" x:Name="ModulesFrame">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Модули" FontSize="18" FontAttributes="Bold" />
+
+                    <CollectionView x:Name="ModulesCollectionView" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Spacing="8" Padding="0,10,0,10">
+                                    <!-- Module Info -->
+                                    <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" />
+                                    <Label Text="{Binding Description}" FontSize="12" TextColor="Gray" />
+
+                                    <!-- Module Settings -->
+                                    <CollectionView ItemsSource="{Binding Settings}" SelectionMode="None">
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="*,Auto" Padding="10,5,0,5">
+                                                    <VerticalStackLayout Grid.Column="0">
+                                                        <Label Text="{Binding DisplayName}" VerticalOptions="Center" />
+                                                        <Label Text="{Binding Description}" FontSize="11" TextColor="Gray" />
+                                                    </VerticalStackLayout>
+
+                                                    <!-- Boolean Switch -->
+                                                    <Switch Grid.Column="1"
+                                                            IsToggled="{Binding BoolValue}"
+                                                            Toggled="OnModuleSettingToggled"
+                                                            IsVisible="{Binding IsBoolean}"
+                                                            VerticalOptions="Center" />
+
+                                                    <!-- String Entry -->
+                                                    <Entry Grid.Column="1"
+                                                           Text="{Binding StringValue}"
+                                                           TextChanged="OnModuleSettingTextChanged"
+                                                           IsVisible="{Binding IsString}"
+                                                           WidthRequest="150"
+                                                           VerticalOptions="Center" />
+
+                                                    <!-- Integer Entry -->
+                                                    <Entry Grid.Column="1"
+                                                           Text="{Binding IntValue}"
+                                                           Keyboard="Numeric"
+                                                           TextChanged="OnModuleSettingTextChanged"
+                                                           IsVisible="{Binding IsInteger}"
+                                                           WidthRequest="100"
+                                                           VerticalOptions="Center" />
+
+                                                    <!-- Choice Picker -->
+                                                    <Picker Grid.Column="1"
+                                                            ItemsSource="{Binding Options}"
+                                                            SelectedItem="{Binding SelectedOption}"
+                                                            SelectedIndexChanged="OnModuleSettingPickerChanged"
+                                                            IsVisible="{Binding IsChoice}"
+                                                            WidthRequest="150"
+                                                            VerticalOptions="Center" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+
+                                    <BoxView HeightRequest="1" Color="LightGray" Margin="0,10,0,0" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label x:Name="NoModulesLabel"
+                           Text="Модули не найдены"
+                           FontSize="14"
+                           TextColor="Gray"
+                           IsVisible="False"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Database Section -->
             <Frame BorderColor="LightGray" Padding="15">
                 <VerticalStackLayout Spacing="10">

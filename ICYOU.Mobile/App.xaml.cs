@@ -8,6 +8,17 @@ public partial class App : Application
 	{
 		InitializeComponent();
 
+		// Загружаем модули
+		try
+		{
+			Services.ModuleManager.Instance.LoadModules();
+			System.Diagnostics.Debug.WriteLine("[APP] Modules loaded successfully");
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"[APP] Error loading modules: {ex.Message}");
+		}
+
 		// Глобальный обработчик необработанных исключений
 		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 		TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
