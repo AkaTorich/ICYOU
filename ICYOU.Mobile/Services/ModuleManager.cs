@@ -9,9 +9,8 @@ public class ModuleManager
 {
     private static ModuleManager? _instance;
     public static ModuleManager Instance => _instance ??= new ModuleManager();
-    
+
     private readonly List<IModule> _modules = new();
-    private string? _modulesPath;
     private readonly List<Func<Message, Message?>> _incomingInterceptors = new();
     private readonly List<Func<Message, Message?>> _outgoingInterceptors = new();
     
@@ -19,20 +18,6 @@ public class ModuleManager
     
     private ModuleManager()
     {
-    }
-    
-    private string GetModulesPath()
-    {
-        if (_modulesPath == null)
-        {
-            _modulesPath = Path.Combine(GetAppDataDirectory(), "modules");
-        }
-        return _modulesPath;
-    }
-    
-    private static string GetAppDataDirectory()
-    {
-        return FileSystem.AppDataDirectory;
     }
     
     /// <summary>
@@ -90,91 +75,65 @@ public class ModuleManager
     public void LoadModules()
     {
         _modules.Clear();
-        
-        var modulesPath = GetModulesPath();
-        
-        if (!Directory.Exists(modulesPath))
-        {
-            Directory.CreateDirectory(modulesPath);
-        }
-        
-        // Копируем модули из assets в папку modules при первом запуске
-        CopyModulesFromAssets(modulesPath);
-        
-        if (!Directory.Exists(modulesPath))
-        {
-            return;
-        }
-        
-        foreach (var dllFile in Directory.GetFiles(modulesPath, "*.dll"))
+
+        var moduleNames = new[] { "ICYOU.Modules.E2E.dll", "ICYOU.Modules.Quote.dll", "ICYOU.Modules.LinkPreview.dll" };
+
+        foreach (var moduleName in moduleNames)
         {
             try
             {
-                LoadModuleFromDll(dllFile);
+                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Загрузка модуля {moduleName}...");
+
+                // Загружаем модуль напрямую из assets
+                using var stream = FileSystem.OpenAppPackageFileAsync($"modules/{moduleName}").GetAwaiter().GetResult();
+                if (stream == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ModuleManager] Не удалось открыть {moduleName}");
+                    continue;
+                }
+
+                // Читаем DLL в память
+                using var memoryStream = new MemoryStream();
+                stream.CopyTo(memoryStream);
+                var assemblyBytes = memoryStream.ToArray();
+
+                // Загружаем assembly из байтов
+                var assembly = Assembly.Load(assemblyBytes);
+                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Assembly {moduleName} загружен");
+
+                // Ищем и создаем экземпляры модулей
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (typeof(IModule).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
+                    {
+                        var module = (IModule?)Activator.CreateInstance(type);
+                        if (module != null)
+                        {
+                            _modules.Add(module);
+                            System.Diagnostics.Debug.WriteLine($"[ModuleManager] Создан экземпляр модуля: {module.Name}");
+
+                            // Инициализируем модуль
+                            try
+                            {
+                                var context = new ClientModuleContext(module.Id);
+                                module.Initialize(context);
+                                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Модуль {module.Name} инициализирован");
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Ошибка инициализации модуля {module.Name}: {ex.Message}");
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки модуля {dllFile}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Ошибка загрузки {moduleName}: {ex.Message}\n{ex.StackTrace}");
             }
         }
-    }
-    
-    private void CopyModulesFromAssets(string modulesPath)
-    {
-        try
-        {
-            var moduleNames = new[] { "ICYOU.Modules.E2E.dll", "ICYOU.Modules.Quote.dll", "ICYOU.Modules.LinkPreview.dll" };
-            
-            foreach (var moduleName in moduleNames)
-            {
-                var targetPath = Path.Combine(modulesPath, moduleName);
-                
-                // Если модуль уже скопирован, пропускаем
-                if (File.Exists(targetPath))
-                    continue;
-                
-                // Пытаемся загрузить из assets
-                using var stream = FileSystem.OpenAppPackageFileAsync($"modules/{moduleName}").GetAwaiter().GetResult();
-                if (stream != null)
-                {
-                    using var fileStream = File.Create(targetPath);
-                    stream.CopyTo(fileStream);
-                    System.Diagnostics.Debug.WriteLine($"[ModuleManager] Скопирован модуль {moduleName} из assets");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[ModuleManager] Ошибка копирования модулей из assets: {ex.Message}");
-        }
-    }
-    
-    private void LoadModuleFromDll(string dllPath)
-    {
-        var assembly = Assembly.LoadFrom(dllPath);
-        
-        foreach (var type in assembly.GetTypes())
-        {
-            if (typeof(IModule).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
-            {
-                var module = (IModule?)Activator.CreateInstance(type);
-                if (module != null)
-                {
-                    _modules.Add(module);
-                    
-                    // Инициализируем модуль с заглушкой контекста
-                    try
-                    {
-                        var context = new ClientModuleContext(module.Id);
-                        module.Initialize(context);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Ошибка инициализации модуля {module.Name}: {ex.Message}");
-                    }
-                }
-            }
-        }
+
+        System.Diagnostics.Debug.WriteLine($"[ModuleManager] Всего загружено модулей: {_modules.Count}");
     }
     
     public List<ModuleInfo> GetModuleInfos()
