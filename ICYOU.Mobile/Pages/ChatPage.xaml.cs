@@ -289,6 +289,13 @@ public partial class ChatPage : ContentPage
                     var message = packet.GetData<Message>();
                     if (message != null && message.ChatId == _chatId)
                     {
+                        // Пропускаем свои собственные сообщения (они уже добавлены локально)
+                        if (AppState.CurrentUser != null && message.SenderId == AppState.CurrentUser.Id)
+                        {
+                            DebugLog.Write($"[ChatPage] Пропускаем своё сообщение: {message.Content.Substring(0, Math.Min(50, message.Content.Length))}");
+                            return;
+                        }
+
                         DebugLog.Write($"[ChatPage] Получено новое сообщение: {message.Content.Substring(0, Math.Min(50, message.Content.Length))}");
 
                         // Обрабатываем сообщение через модули
