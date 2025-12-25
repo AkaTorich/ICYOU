@@ -48,10 +48,15 @@ public partial class ChatPage : ContentPage
         {
             var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
             _messages.Clear();
+            DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (нет сети)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
                 // Обрабатываем сообщение через модули
                 var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                if (processedMsg.Content != msg.Content)
+                {
+                    DebugLog.Write($"[ChatPage] Сообщение изменено: '{msg.Content.Substring(0, Math.Min(30, msg.Content.Length))}' -> '{processedMsg.Content.Substring(0, Math.Min(30, processedMsg.Content.Length))}'");
+                }
                 _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
@@ -62,10 +67,15 @@ public partial class ChatPage : ContentPage
             // Если чата еще нет (только друг), проверяем есть ли сообщения локально
             var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
             _messages.Clear();
+            DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (chatId=0)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
                 // Обрабатываем сообщение через модули
                 var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                if (processedMsg.Content != msg.Content)
+                {
+                    DebugLog.Write($"[ChatPage] Сообщение изменено: '{msg.Content.Substring(0, Math.Min(30, msg.Content.Length))}' -> '{processedMsg.Content.Substring(0, Math.Min(30, processedMsg.Content.Length))}'");
+                }
                 _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
@@ -115,10 +125,15 @@ public partial class ChatPage : ContentPage
             // Загружаем из локальной БД
             var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
             _messages.Clear();
+            DebugLog.Write($"[ChatPage] Ошибка загрузки с сервера, загружаем {localMessages.Count} сообщений из локальной БД");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
                 // Обрабатываем сообщение через модули
                 var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                if (processedMsg.Content != msg.Content)
+                {
+                    DebugLog.Write($"[ChatPage] Сообщение изменено: '{msg.Content.Substring(0, Math.Min(30, msg.Content.Length))}' -> '{processedMsg.Content.Substring(0, Math.Min(30, processedMsg.Content.Length))}'");
+                }
                 _messages.Add(new MessageViewModel(processedMsg));
             }
         }
@@ -274,8 +289,19 @@ public partial class ChatPage : ContentPage
                     var message = packet.GetData<Message>();
                     if (message != null && message.ChatId == _chatId)
                     {
+                        DebugLog.Write($"[ChatPage] Получено новое сообщение: {message.Content.Substring(0, Math.Min(50, message.Content.Length))}");
+
                         // Обрабатываем сообщение через модули
                         var processedMessage = ModuleManager.Instance.ProcessIncomingMessage(message) ?? message;
+
+                        if (processedMessage.Content != message.Content)
+                        {
+                            DebugLog.Write($"[ChatPage] Новое сообщение изменено модулями: '{processedMessage.Content.Substring(0, Math.Min(50, processedMessage.Content.Length))}'");
+                        }
+                        else
+                        {
+                            DebugLog.Write($"[ChatPage] Новое сообщение НЕ изменено модулями");
+                        }
 
                         // Проверяем, нет ли уже этого сообщения
                         if (!_messages.Any(m => m.Message.Id == processedMessage.Id))
