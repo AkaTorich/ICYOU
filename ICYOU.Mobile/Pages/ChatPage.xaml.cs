@@ -308,12 +308,13 @@ public partial class ChatPage : ContentPage
                             return;
                         }
 
-                        DebugLog.Write($"[ChatPage] Получено новое сообщение: {message.Content.Substring(0, Math.Min(50, message.Content.Length))}");
+                        var originalContent = message.Content;
+                        DebugLog.Write($"[ChatPage] Получено новое сообщение: {originalContent.Substring(0, Math.Min(50, originalContent.Length))}");
 
                         // Обрабатываем сообщение через модули
                         var processedMessage = ModuleManager.Instance.ProcessIncomingMessage(message) ?? message;
 
-                        if (processedMessage.Content != message.Content)
+                        if (processedMessage.Content != originalContent)
                         {
                             DebugLog.Write($"[ChatPage] Новое сообщение изменено модулями: '{processedMessage.Content.Substring(0, Math.Min(50, processedMessage.Content.Length))}'");
                         }
