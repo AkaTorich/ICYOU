@@ -50,7 +50,9 @@ public partial class ChatPage : ContentPage
             _messages.Clear();
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем сообщение через модули
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
         }
@@ -62,7 +64,9 @@ public partial class ChatPage : ContentPage
             _messages.Clear();
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем сообщение через модули
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
         }
@@ -84,9 +88,11 @@ public partial class ChatPage : ContentPage
                     _messages.Clear();
                     foreach (var msg in data.Messages.OrderBy(m => m.Timestamp))
                     {
-                        _messages.Add(new MessageViewModel(msg));
+                        // Обрабатываем сообщение через модули
+                        var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                        _messages.Add(new MessageViewModel(processedMsg));
                         // Сохраняем в локальную БД
-                        LocalDatabaseService.Instance.SaveMessage(msg);
+                        LocalDatabaseService.Instance.SaveMessage(processedMsg);
                     }
 
                     // Прокручиваем вниз
@@ -106,7 +112,9 @@ public partial class ChatPage : ContentPage
             _messages.Clear();
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем сообщение через модули
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
         }
     }
@@ -261,11 +269,14 @@ public partial class ChatPage : ContentPage
                     var message = packet.GetData<Message>();
                     if (message != null && message.ChatId == _chatId)
                     {
+                        // Обрабатываем сообщение через модули
+                        var processedMessage = ModuleManager.Instance.ProcessIncomingMessage(message) ?? message;
+
                         // Проверяем, нет ли уже этого сообщения
-                        if (!_messages.Any(m => m.Message.Id == message.Id))
+                        if (!_messages.Any(m => m.Message.Id == processedMessage.Id))
                         {
-                            _messages.Add(new MessageViewModel(message));
-                            LocalDatabaseService.Instance.SaveMessage(message);
+                            _messages.Add(new MessageViewModel(processedMessage));
+                            LocalDatabaseService.Instance.SaveMessage(processedMessage);
 
                             // Прокручиваем вниз
                             if (_messages.Count > 0)
