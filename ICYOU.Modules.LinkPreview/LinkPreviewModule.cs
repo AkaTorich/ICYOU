@@ -91,11 +91,9 @@ public class LinkPreviewModule : IModule, IModuleSettings
     {
         try
         {
-            // Не используем Clear() для совместимости с Android AOT
-            if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
-            {
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
-            }
+            // Используем TryAddWithoutValidation для совместимости с Android AOT
+            // (Clear() и Contains() не поддерживаются)
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
             
             var html = await _httpClient.GetStringAsync(url);
             var doc = new HtmlDocument();
