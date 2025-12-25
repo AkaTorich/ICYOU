@@ -67,8 +67,8 @@ public class LinkPreviewModule : IModule, IModuleSettings
         
         try
         {
-            // Запускаем в фоновом потоке с таймаутом 3 секунды
-            var task = Task.Run(() => GetLinkPreviewAsync(url));
+            // Вызываем напрямую без Task.Run для совместимости с Android AOT
+            var task = GetLinkPreviewAsync(url);
             if (task.Wait(TimeSpan.FromSeconds(3)))
             {
                 var preview = task.Result;
