@@ -13,8 +13,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- AOT и Trimming отключены из-за багов с HttpClient в MAUI Android -->
-		<PublishTrimmed>false</PublishTrimmed>
+		<!-- AOT отключен, Trimming в режиме partial для HttpClient -->
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>partial</TrimMode>
 		<RunAOTCompilation>false</RunAOTCompilation>
 
 		<!-- Если возникают ошибки AOT компиляции, попробуйте: -->
