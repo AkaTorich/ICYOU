@@ -89,7 +89,12 @@ public partial class ChatPage : ContentPage
                     foreach (var msg in data.Messages.OrderBy(m => m.Timestamp))
                     {
                         // Обрабатываем сообщение через модули
+                        DebugLog.Write($"[ChatPage] Обработка сообщения через модули: {msg.Content.Substring(0, Math.Min(50, msg.Content.Length))}");
                         var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                        if (processedMsg.Content != msg.Content)
+                        {
+                            DebugLog.Write($"[ChatPage] Сообщение изменено модулями: {processedMsg.Content.Substring(0, Math.Min(50, processedMsg.Content.Length))}");
+                        }
                         _messages.Add(new MessageViewModel(processedMsg));
                         // Сохраняем в локальную БД
                         LocalDatabaseService.Instance.SaveMessage(processedMsg);

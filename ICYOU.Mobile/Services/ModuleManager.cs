@@ -35,7 +35,7 @@ public class ModuleManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка в интерсепторе: {ex.Message}");
+                DebugLog.Write($"[ModuleManager] Ошибка в интерсепторе: {ex.Message}");
             }
         }
         return result;
@@ -56,7 +56,7 @@ public class ModuleManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка в интерсепторе: {ex.Message}");
+                DebugLog.Write($"[ModuleManager] Ошибка в интерсепторе: {ex.Message}");
             }
         }
         return result;
@@ -78,17 +78,19 @@ public class ModuleManager
 
         var moduleNames = new[] { "ICYOU.Modules.E2E.dll", "ICYOU.Modules.Quote.dll", "ICYOU.Modules.LinkPreview.dll" };
 
+        DebugLog.Write($"[ModuleManager] Начинаем загрузку модулей...");
+
         foreach (var moduleName in moduleNames)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Загрузка модуля {moduleName}...");
+                DebugLog.Write($"[ModuleManager] Загрузка модуля {moduleName}...");
 
                 // Загружаем модуль напрямую из assets
                 using var stream = FileSystem.OpenAppPackageFileAsync($"modules/{moduleName}").GetAwaiter().GetResult();
                 if (stream == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[ModuleManager] Не удалось открыть {moduleName}");
+                    DebugLog.Write($"[ModuleManager] Не удалось открыть {moduleName}");
                     continue;
                 }
 
@@ -96,10 +98,11 @@ public class ModuleManager
                 using var memoryStream = new MemoryStream();
                 stream.CopyTo(memoryStream);
                 var assemblyBytes = memoryStream.ToArray();
+                DebugLog.Write($"[ModuleManager] Прочитано {assemblyBytes.Length} байт для {moduleName}");
 
                 // Загружаем assembly из байтов
                 var assembly = Assembly.Load(assemblyBytes);
-                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Assembly {moduleName} загружен");
+                DebugLog.Write($"[ModuleManager] Assembly {moduleName} загружен, типов: {assembly.GetTypes().Length}");
 
                 // Ищем и создаем экземпляры модулей
                 foreach (var type in assembly.GetTypes())
@@ -110,18 +113,19 @@ public class ModuleManager
                         if (module != null)
                         {
                             _modules.Add(module);
-                            System.Diagnostics.Debug.WriteLine($"[ModuleManager] Создан экземпляр модуля: {module.Name}");
+                            DebugLog.Write($"[ModuleManager] Создан экземпляр модуля: {module.Name} (ID: {module.Id})");
 
                             // Инициализируем модуль
                             try
                             {
                                 var context = new ClientModuleContext(module.Id);
                                 module.Initialize(context);
-                                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Модуль {module.Name} инициализирован");
+                                DebugLog.Write($"[ModuleManager] Модуль {module.Name} инициализирован");
+                                DebugLog.Write($"[ModuleManager] Interceptors: incoming={_incomingInterceptors.Count}, outgoing={_outgoingInterceptors.Count}");
                             }
                             catch (Exception ex)
                             {
-                                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Ошибка инициализации модуля {module.Name}: {ex.Message}");
+                                DebugLog.Write($"[ModuleManager] Ошибка инициализации модуля {module.Name}: {ex.Message}");
                             }
                         }
                     }
@@ -129,11 +133,12 @@ public class ModuleManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ModuleManager] Ошибка загрузки {moduleName}: {ex.Message}\n{ex.StackTrace}");
+                DebugLog.Write($"[ModuleManager] Ошибка загрузки {moduleName}: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
-        System.Diagnostics.Debug.WriteLine($"[ModuleManager] Всего загружено модулей: {_modules.Count}");
+        DebugLog.Write($"[ModuleManager] Всего загружено модулей: {_modules.Count}");
+        DebugLog.Write($"[ModuleManager] Interceptors: incoming={_incomingInterceptors.Count}, outgoing={_outgoingInterceptors.Count}");
     }
     
     public List<ModuleInfo> GetModuleInfos()
@@ -222,11 +227,11 @@ internal class ClientModuleLogger : IModuleLogger
     private readonly string _prefix;
     public ClientModuleLogger(string prefix) => _prefix = prefix;
     
-    public void Info(string message) => System.Diagnostics.Debug.WriteLine($"[{_prefix}] INFO: {message}");
-    public void Warning(string message) => System.Diagnostics.Debug.WriteLine($"[{_prefix}] WARN: {message}");
-    public void Error(string message, Exception? ex = null) => 
-        System.Diagnostics.Debug.WriteLine($"[{_prefix}] ERROR: {message}" + (ex != null ? $"\n{ex}" : ""));
-    public void Debug(string message) => System.Diagnostics.Debug.WriteLine($"[{_prefix}] DEBUG: {message}");
+    public void Info(string message) => DebugLog.Write($"[{_prefix}] INFO: {message}");
+    public void Warning(string message) => DebugLog.Write($"[{_prefix}] WARN: {message}");
+    public void Error(string message, Exception? ex = null) =>
+        DebugLog.Write($"[{_prefix}] ERROR: {message}" + (ex != null ? $"\n{ex}" : ""));
+    public void Debug(string message) => DebugLog.Write($"[{_prefix}] DEBUG: {message}");
 }
 
 internal class ClientModuleStorage : IModuleStorage
