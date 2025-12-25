@@ -42,23 +42,46 @@ public class QuoteModule : IModule, IModuleSettings
     /// </summary>
     private Message? FormatQuote(Message message)
     {
-        if (!_enabled) return message;
-        if (!message.Content.StartsWith("[QUOTE|")) return message;
-        
+        _context?.Logger.Debug($"FormatQuote вызван для: {message.Content.Substring(0, Math.Min(50, message.Content.Length))}");
+
+        if (!_enabled)
+        {
+            _context?.Logger.Debug("Quote модуль отключен");
+            return message;
+        }
+
+        if (!message.Content.StartsWith("[QUOTE|"))
+        {
+            _context?.Logger.Debug("Сообщение не начинается с [QUOTE|");
+            return message;
+        }
+
+        _context?.Logger.Debug("Обрабатываем цитату...");
+
         try
         {
             var endQuote = message.Content.IndexOf(']');
-            if (endQuote < 0) return message;
-            
+            if (endQuote < 0)
+            {
+                _context?.Logger.Debug("Не найдена закрывающая скобка");
+                return message;
+            }
+
             var quoteData = message.Content.Substring(7, endQuote - 7);
             var parts = quoteData.Split('|', 3);
-            
-            if (parts.Length < 3) return message;
-            
+
+            if (parts.Length < 3)
+            {
+                _context?.Logger.Debug($"Недостаточно частей: {parts.Length}");
+                return message;
+            }
+
             var quotedSender = parts[1];
             var quotedContent = parts[2];
             var replyContent = message.Content.Substring(endQuote + 1).TrimStart();
-            
+
+            _context?.Logger.Debug($"Parsed: sender={quotedSender}, content={quotedContent.Substring(0, Math.Min(20, quotedContent.Length))}, reply={replyContent}");
+
             // Форматируем в зависимости от стиля
             message.Content = _quoteStyle switch
             {
@@ -66,12 +89,14 @@ public class QuoteModule : IModule, IModuleSettings
                 "minimal" => $"↩ {quotedSender}: {TruncateText(quotedContent, 50)}\n{replyContent}",
                 _ => $"▎ {quotedSender}: {quotedContent}\n\n{replyContent}" // line style
             };
+
+            _context?.Logger.Debug($"Отформатировано: {message.Content.Substring(0, Math.Min(50, message.Content.Length))}");
         }
-        catch
+        catch (Exception ex)
         {
-            // Если не удалось распарсить - возвращаем как есть
+            _context?.Logger.Error($"Ошибка парсинга цитаты: {ex.Message}");
         }
-        
+
         return message;
     }
     
