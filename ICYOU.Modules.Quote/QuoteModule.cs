@@ -50,13 +50,17 @@ public class QuoteModule : IModule, IModuleSettings
             return message;
         }
 
-        if (!message.Content.StartsWith("[QUOTE|"))
+        // Поддерживаем оба формата: [QUOTE|...] и [QUOTES|...]
+        bool isQuote = message.Content.StartsWith("[QUOTE|");
+        bool isQuotes = message.Content.StartsWith("[QUOTES|");
+
+        if (!isQuote && !isQuotes)
         {
-            _context?.Logger.Debug("Сообщение не начинается с [QUOTE|");
+            _context?.Logger.Debug("Сообщение не является цитатой");
             return message;
         }
 
-        _context?.Logger.Debug("Обрабатываем цитату...");
+        _context?.Logger.Debug($"Обрабатываем цитату (формат: {(isQuote ? "QUOTE" : "QUOTES")})...");
 
         try
         {
@@ -67,20 +71,42 @@ public class QuoteModule : IModule, IModuleSettings
                 return message;
             }
 
-            var quoteData = message.Content.Substring(7, endQuote - 7);
-            var parts = quoteData.Split('|', 3);
+            var replyContent = message.Content.Substring(endQuote + 1).TrimStart();
+            string quotedSender;
+            string quotedContent;
 
-            if (parts.Length < 3)
+            if (isQuote)
             {
-                _context?.Logger.Debug($"Недостаточно частей: {parts.Length}");
-                return message;
+                // Формат: [QUOTE|MessageId|SenderName|Content]reply
+                var quoteData = message.Content.Substring(7, endQuote - 7);
+                var parts = quoteData.Split('|', 3);
+
+                if (parts.Length < 3)
+                {
+                    _context?.Logger.Debug($"QUOTE: Недостаточно частей: {parts.Length}");
+                    return message;
+                }
+
+                quotedSender = parts[1];
+                quotedContent = parts[2];
+            }
+            else
+            {
+                // Формат: [QUOTES|MessageId~SenderName]reply
+                var quoteData = message.Content.Substring(8, endQuote - 8);
+                var parts = quoteData.Split('~', 2);
+
+                if (parts.Length < 2)
+                {
+                    _context?.Logger.Debug($"QUOTES: Недостаточно частей: {parts.Length}");
+                    return message;
+                }
+
+                quotedSender = parts[1];
+                quotedContent = "цитата"; // В формате QUOTES нет контента
             }
 
-            var quotedSender = parts[1];
-            var quotedContent = parts[2];
-            var replyContent = message.Content.Substring(endQuote + 1).TrimStart();
-
-            _context?.Logger.Debug($"Parsed: sender={quotedSender}, content={quotedContent.Substring(0, Math.Min(20, quotedContent.Length))}, reply={replyContent}");
+            _context?.Logger.Debug($"Parsed: sender={quotedSender}, reply={replyContent}");
 
             // Форматируем в зависимости от стиля
             message.Content = _quoteStyle switch
