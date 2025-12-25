@@ -32,8 +32,95 @@
                                        IsVisible="{Binding IsOwnMessage, Converter={StaticResource InvertedBoolConverter}}"
                                        Margin="0,0,0,5" />
 
+                                <!-- Quote Block (if message has quote) -->
+                                <Frame IsVisible="{Binding HasQuote}"
+                                       BackgroundColor="#F0F0F0"
+                                       Padding="8"
+                                       CornerRadius="6"
+                                       HasShadow="False"
+                                       Margin="0,0,0,6">
+                                    <Grid ColumnDefinitions="3,8,*">
+                                        <!-- Vertical Line -->
+                                        <BoxView Grid.Column="0"
+                                                 BackgroundColor="#4CAF50"
+                                                 CornerRadius="2" />
+
+                                        <!-- Quote Content -->
+                                        <VerticalStackLayout Grid.Column="2">
+                                            <Label Text="{Binding QuoteSender}"
+                                                   FontSize="11"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#4CAF50" />
+                                            <Label Text="{Binding QuoteContent}"
+                                                   FontSize="12"
+                                                   TextColor="#666666"
+                                                   LineBreakMode="WordWrap"
+                                                   MaxLines="3" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Frame>
+
+                                <!-- LinkPreview (если есть) -->
+                                <VerticalStackLayout IsVisible="{Binding HasLinkPreview}" Spacing="6">
+                                    <!-- Текст перед превью (обычно ссылка) -->
+                                    <Label Text="{Binding TextBeforePreview}"
+                                           FontSize="14"
+                                           LineBreakMode="WordWrap"
+                                           IsVisible="{Binding HasTextBeforePreview}" />
+
+                                    <!-- Превью карточка -->
+                                    <Frame BackgroundColor="#F5F5F5"
+                                           Padding="0"
+                                           CornerRadius="8"
+                                           HasShadow="False"
+                                           MaximumWidthRequest="280">
+                                        <VerticalStackLayout Spacing="0">
+                                            <!-- Картинка (если есть) -->
+                                            <Image Source="{Binding LinkPreviewImageUrl}"
+                                                   Aspect="AspectFill"
+                                                   HeightRequest="140"
+                                                   IsVisible="{Binding HasLinkPreviewImage}" />
+
+                                            <!-- Контент -->
+                                            <Grid Padding="10" ColumnDefinitions="3,8,*">
+                                                <!-- Вертикальная линия -->
+                                                <BoxView Grid.Column="0"
+                                                         BackgroundColor="#4CAF50"
+                                                         CornerRadius="2" />
+
+                                                <!-- Текст -->
+                                                <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                                    <Label Text="{Binding LinkPreviewSiteName}"
+                                                           FontSize="11"
+                                                           TextColor="#4CAF50"
+                                                           FontAttributes="Bold" />
+                                                    <Label Text="{Binding LinkPreviewTitle}"
+                                                           FontSize="13"
+                                                           FontAttributes="Bold"
+                                                           LineBreakMode="WordWrap"
+                                                           MaxLines="2" />
+                                                    <Label Text="{Binding LinkPreviewDescription}"
+                                                           FontSize="12"
+                                                           TextColor="#666666"
+                                                           LineBreakMode="WordWrap"
+                                                           MaxLines="3"
+                                                           IsVisible="{Binding HasLinkPreviewDescription}" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </VerticalStackLayout>
+
                                 <!-- Message Content -->
-                                <Label Text="{Binding Content}"
+                                <!-- Если есть цитата - показываем ReplyText -->
+                                <Label IsVisible="{Binding HasQuote}"
+                                       Text="{Binding ReplyText}"
+                                       FontSize="14"
+                                       LineBreakMode="WordWrap" />
+
+                                <!-- Если нет цитаты и нет превью - показываем полный Content -->
+                                <Label IsVisible="{Binding ShowFullContent}"
+                                       Text="{Binding Content}"
                                        FontSize="14"
                                        LineBreakMode="WordWrap" />
 

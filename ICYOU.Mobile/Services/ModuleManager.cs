@@ -76,7 +76,8 @@ public class ModuleManager
     {
         _modules.Clear();
 
-        var moduleNames = new[] { "ICYOU.Modules.E2E.dll", "ICYOU.Modules.Quote.dll", "ICYOU.Modules.LinkPreview.dll" };
+        // Quote модуль не используется - UI сам парсит формат [QUOTE|...]
+        var moduleNames = new[] { "ICYOU.Modules.E2E.dll", "ICYOU.Modules.LinkPreview.dll" };
 
         DebugLog.Write($"[ModuleManager] Начинаем загрузку модулей...");
 
