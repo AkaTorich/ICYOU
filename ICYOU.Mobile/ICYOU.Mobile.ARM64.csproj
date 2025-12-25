@@ -13,9 +13,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- AOT ВКЛЮЧЕН для ARM64 (без AOT приложение не запустится) -->
+		<!-- AOT отключен из-за багов с HttpClient в MAUI Android -->
 		<PublishTrimmed>true</PublishTrimmed>
-		<RunAOTCompilation>true</RunAOTCompilation>
+		<RunAOTCompilation>false</RunAOTCompilation>
 
 		<!-- Если возникают ошибки AOT компиляции, попробуйте: -->
 		<!-- <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot> -->
