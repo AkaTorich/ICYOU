@@ -277,8 +277,8 @@ keytool -genkey -v -keystore icyou.keystore -alias icyou -keyalg RSA -keysize 20
 
 ## 📄 Лицензия
 
-[Укажите вашу лицензию]
+FREE
 
 ## 👥 Авторы
 
-[Укажите авторов проекта]
+AkaTorich - main developer, creator
