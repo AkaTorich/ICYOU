@@ -91,13 +91,10 @@ public class LinkPreviewModule : IModule, IModuleSettings
     {
         try
         {
-            // Используем SendAsync с HttpRequestMessage для совместимости с Android AOT
-            // (GetStringAsync и GetAsync не поддерживаются)
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
+            // Используем TryAddWithoutValidation для совместимости с Android
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
 
-            var response = await _httpClient.SendAsync(request);
-            var html = await response.Content.ReadAsStringAsync();
+            var html = await _httpClient.GetStringAsync(url);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
             

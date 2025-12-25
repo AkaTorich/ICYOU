@@ -20,10 +20,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- AOT включен для x86_64 (эмулятор) -->
+		<!-- AOT отключен из-за багов с HttpClient в MAUI Android -->
 		<!-- Для ARM64 используйте build-android-arm64.bat и ICYOU.Mobile.ARM64.csproj -->
 		<PublishTrimmed>true</PublishTrimmed>
-		<RunAOTCompilation>true</RunAOTCompilation>
+		<RunAOTCompilation>false</RunAOTCompilation>
 
 		<!-- Display name -->
 		<ApplicationTitle>ICYOU.Mobile</ApplicationTitle>
