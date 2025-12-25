@@ -12,8 +12,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- AOT отключен из-за багов с HttpClient в MAUI -->
-		<PublishTrimmed>true</PublishTrimmed>
+		<!-- AOT и Trimming отключены из-за багов с HttpClient в MAUI -->
+		<PublishTrimmed>false</PublishTrimmed>
 		<RunAOTCompilation>false</RunAOTCompilation>
 
 		<ApplicationTitle>ICYOU.Mobile</ApplicationTitle>

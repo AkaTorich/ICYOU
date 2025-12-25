@@ -20,9 +20,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- AOT отключен из-за багов с HttpClient в MAUI Android -->
+		<!-- AOT и Trimming отключены из-за багов с HttpClient в MAUI Android -->
 		<!-- Для ARM64 используйте build-android-arm64.bat и ICYOU.Mobile.ARM64.csproj -->
-		<PublishTrimmed>true</PublishTrimmed>
+		<PublishTrimmed>false</PublishTrimmed>
 		<RunAOTCompilation>false</RunAOTCompilation>
 
 		<!-- Display name -->
