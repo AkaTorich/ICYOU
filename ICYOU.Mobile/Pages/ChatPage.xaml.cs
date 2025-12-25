@@ -237,8 +237,20 @@ public partial class ChatPage : ContentPage
                 Status = MessageStatus.Sending
             };
 
-            // Добавляем в список сразу
-            var viewModel = new MessageViewModel(message);
+            // Обрабатываем через модули для отображения (создаем копию)
+            var displayMessage = new Message
+            {
+                ChatId = message.ChatId,
+                SenderId = message.SenderId,
+                SenderName = message.SenderName,
+                Content = message.Content,
+                Timestamp = message.Timestamp,
+                Status = message.Status
+            };
+            var processedMessage = ModuleManager.Instance.ProcessIncomingMessage(displayMessage) ?? displayMessage;
+
+            // Добавляем в список отформатированное сообщение
+            var viewModel = new MessageViewModel(processedMessage);
             _messages.Add(viewModel);
 
             // Прокручиваем вниз
