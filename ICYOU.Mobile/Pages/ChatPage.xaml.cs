@@ -51,13 +51,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (нет сети)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // Обрабатываем сообщение через модули
-                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                if (processedMsg.Content != msg.Content)
-                {
-                    DebugLog.Write($"[ChatPage] Сообщение изменено: '{msg.Content.Substring(0, Math.Min(30, msg.Content.Length))}' -> '{processedMsg.Content.Substring(0, Math.Min(30, processedMsg.Content.Length))}'");
-                }
-                _messages.Add(new MessageViewModel(processedMsg));
+                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
+                // ViewModel сам распарсит [QUOTE|...] и [LINKPREVIEW|...]
+                _messages.Add(new MessageViewModel(msg));
             }
             return;
         }
@@ -70,13 +66,8 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (chatId=0)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // Обрабатываем сообщение через модули
-                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                if (processedMsg.Content != msg.Content)
-                {
-                    DebugLog.Write($"[ChatPage] Сообщение изменено: '{msg.Content.Substring(0, Math.Min(30, msg.Content.Length))}' -> '{processedMsg.Content.Substring(0, Math.Min(30, processedMsg.Content.Length))}'");
-                }
-                _messages.Add(new MessageViewModel(processedMsg));
+                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
+                _messages.Add(new MessageViewModel(msg));
             }
             return;
         }
@@ -96,18 +87,24 @@ public partial class ChatPage : ContentPage
                 if (data != null)
                 {
                     _messages.Clear();
+                    DebugLog.Write($"[ChatPage] Получено {data.Messages.Count} сообщений с сервера (обычно 0 - сервер не хранит историю)");
                     foreach (var msg in data.Messages.OrderBy(m => m.Timestamp))
                     {
-                        // Обрабатываем сообщение через модули
-                        DebugLog.Write($"[ChatPage] Обработка сообщения через модули: {msg.Content.Substring(0, Math.Min(50, msg.Content.Length))}");
-                        var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                        if (processedMsg.Content != msg.Content)
+                        // НЕ обрабатываем через модули - сообщения от сервера в RAW формате
+                        _messages.Add(new MessageViewModel(msg));
+                        // Сохраняем в локальную БД в RAW формате
+                        LocalDatabaseService.Instance.SaveMessage(msg);
+                    }
+
+                    // Если сервер вернул пустую историю - загружаем из локальной БД
+                    if (data.Messages.Count == 0)
+                    {
+                        DebugLog.Write($"[ChatPage] Сервер вернул пустую историю, загружаем из локальной БД");
+                        var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
+                        foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
                         {
-                            DebugLog.Write($"[ChatPage] Сообщение изменено модулями: {processedMsg.Content.Substring(0, Math.Min(50, processedMsg.Content.Length))}");
+                            _messages.Add(new MessageViewModel(msg));
                         }
-                        _messages.Add(new MessageViewModel(processedMsg));
-                        // Сохраняем в локальную БД
-                        LocalDatabaseService.Instance.SaveMessage(processedMsg);
                     }
 
                     // Прокручиваем вниз
@@ -128,13 +125,8 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Ошибка загрузки с сервера, загружаем {localMessages.Count} сообщений из локальной БД");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // Обрабатываем сообщение через модули
-                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                if (processedMsg.Content != msg.Content)
-                {
-                    DebugLog.Write($"[ChatPage] Сообщение изменено: '{msg.Content.Substring(0, Math.Min(30, msg.Content.Length))}' -> '{processedMsg.Content.Substring(0, Math.Min(30, processedMsg.Content.Length))}'");
-                }
-                _messages.Add(new MessageViewModel(processedMsg));
+                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
+                _messages.Add(new MessageViewModel(msg));
             }
         }
     }
@@ -299,7 +291,11 @@ public partial class ChatPage : ContentPage
                         var originalContent = message.Content;
                         DebugLog.Write($"[ChatPage] Получено новое сообщение: {originalContent.Substring(0, Math.Min(50, originalContent.Length))}");
 
-                        // Обрабатываем сообщение через модули
+                        // Сохраняем ОРИГИНАЛ в БД (до обработки модулями)
+                        // Чтобы при следующей загрузке из БД не было дублирования [LINKPREVIEW|...]
+                        LocalDatabaseService.Instance.SaveMessage(message);
+
+                        // Обрабатываем сообщение через модули для отображения
                         var processedMessage = ModuleManager.Instance.ProcessIncomingMessage(message) ?? message;
 
                         if (processedMessage.Content != originalContent)
@@ -315,7 +311,6 @@ public partial class ChatPage : ContentPage
                         if (!_messages.Any(m => m.Message.Id == processedMessage.Id))
                         {
                             _messages.Add(new MessageViewModel(processedMessage));
-                            LocalDatabaseService.Instance.SaveMessage(processedMessage);
 
                             // Прокручиваем вниз
                             if (_messages.Count > 0)
