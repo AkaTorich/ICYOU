@@ -12,6 +12,7 @@ public partial class ChatPage : ContentPage
     private readonly ObservableCollection<MessageViewModel> _messages = new();
     private ChatViewModel? _chatViewModel;
     private long _chatId;
+    private MessageViewModel? _replyToMessage;
 
     public ChatViewModel? ChatViewModel
     {
@@ -115,6 +116,34 @@ public partial class ChatPage : ContentPage
         await SendMessage();
     }
 
+    private void OnMessageDoubleTapped(object sender, TappedEventArgs e)
+    {
+        if (e.Parameter is MessageViewModel messageViewModel)
+        {
+            ShowReplyPreview(messageViewModel);
+        }
+    }
+
+    private void OnCancelReplyClicked(object sender, EventArgs e)
+    {
+        HideReplyPreview();
+    }
+
+    private void ShowReplyPreview(MessageViewModel message)
+    {
+        _replyToMessage = message;
+        ReplyToSenderLabel.Text = message.SenderName;
+        ReplyToContentLabel.Text = message.Content;
+        ReplyPreviewPanel.IsVisible = true;
+        MessageInput.Focus();
+    }
+
+    private void HideReplyPreview()
+    {
+        _replyToMessage = null;
+        ReplyPreviewPanel.IsVisible = false;
+    }
+
     private async Task SendMessage()
     {
         var content = MessageInput.Text?.Trim();
@@ -126,6 +155,18 @@ public partial class ChatPage : ContentPage
         {
             ShowStatus("Нет подключения к серверу", false);
             return;
+        }
+
+        // Если это цитата, форматируем
+        if (_replyToMessage != null)
+        {
+            content = CreateQuote(
+                _replyToMessage.Message.Id,
+                _replyToMessage.SenderName,
+                _replyToMessage.Content,
+                content
+            );
+            HideReplyPreview();
         }
 
         MessageInput.Text = string.Empty;
@@ -263,5 +304,16 @@ public partial class ChatPage : ContentPage
                 StatusText.IsVisible = false;
             });
         });
+    }
+
+    /// <summary>
+    /// Создаёт строку цитаты для отправки
+    /// Формат: [QUOTE|MessageId|SenderName|Content]ваш ответ
+    /// </summary>
+    private string CreateQuote(long messageId, string senderName, string content, string reply)
+    {
+        // Убираем переносы строк из цитируемого контента
+        var sanitizedContent = content.Replace("\n", " ").Replace("\r", "");
+        return $"[QUOTE|{messageId}|{senderName}|{sanitizedContent}]{reply}";
     }
 }
