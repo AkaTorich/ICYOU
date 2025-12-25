@@ -94,8 +94,11 @@ public class LinkPreviewModule : IModule, IModuleSettings
             // Используем TryAddWithoutValidation для совместимости с Android AOT
             // (Clear() и Contains() не поддерживаются)
             _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
-            
-            var html = await _httpClient.GetStringAsync(url);
+
+            // Используем GetAsync + ReadAsStringAsync для совместимости с Android AOT
+            // (GetStringAsync не поддерживается)
+            var response = await _httpClient.GetAsync(url);
+            var html = await response.Content.ReadAsStringAsync();
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
             
