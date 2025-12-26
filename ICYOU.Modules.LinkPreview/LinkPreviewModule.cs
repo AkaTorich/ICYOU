@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -24,11 +23,7 @@ public class LinkPreviewModule : IModule, IModuleSettings
     private bool _showImage = true;
     private int _maxDescriptionLength = 150;
     
-    private static readonly HttpClient _httpClient = new(new SocketsHttpHandler
-    {
-        ConnectTimeout = TimeSpan.FromSeconds(5),
-        AutomaticDecompression = System.Net.DecompressionMethods.All
-    })
+    private static readonly HttpClient _httpClient = new()
     {
         Timeout = TimeSpan.FromSeconds(5)
     };
@@ -62,18 +57,18 @@ public class LinkPreviewModule : IModule, IModuleSettings
     {
         if (!_enabled) return message;
         if (message.Type != MessageType.Text) return message;
-        
+
         // Ищем ссылки в сообщении
         var matches = UrlRegex.Matches(message.Content);
         if (matches.Count == 0) return message;
-        
+
         // Берём первую ссылку
         var url = matches[0].Value;
-        
+
         try
         {
-            // Вызываем напрямую без Task.Run для совместимости с Android AOT
-            var task = GetLinkPreviewAsync(url);
+            // Запускаем в фоновом потоке с таймаутом 3 секунды (как в Desktop)
+            var task = Task.Run(() => GetLinkPreviewAsync(url));
             if (task.Wait(TimeSpan.FromSeconds(3)))
             {
                 var preview = task.Result;
@@ -88,7 +83,7 @@ public class LinkPreviewModule : IModule, IModuleSettings
         {
             _context?.Logger.Debug($"Не удалось получить превью для {url}: {ex.Message}");
         }
-        
+
         return message;
     }
     
