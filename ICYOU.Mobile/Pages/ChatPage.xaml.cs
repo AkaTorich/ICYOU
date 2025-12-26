@@ -229,7 +229,7 @@ public partial class ChatPage : ContentPage
                 Status = MessageStatus.Sending
             };
 
-            // Обрабатываем исходящее сообщение через модули (LinkPreview добавит превью)
+            // Обрабатываем исходящее сообщение через модули ТОЛЬКО для локального отображения
             var processedMessage = ModuleManager.Instance.ProcessOutgoingMessage(message) ?? message;
 
             // Добавляем в UI обработанное сообщение (ViewModel сам распарсит RAW формат [QUOTE|...] и [LINKPREVIEW|...])
@@ -239,17 +239,17 @@ public partial class ChatPage : ContentPage
             // Прокручиваем вниз
             MessagesList.ScrollTo(viewModel, position: ScrollToPosition.End, animate: true);
 
-            // Отправляем на сервер обработанное сообщение
+            // Отправляем на сервер ОРИГИНАЛЬНОЕ сообщение (без превью - другие клиенты обработают локально)
             var packet = new Packet(PacketType.SendMessage, new SendMessageData
             {
                 ChatId = _chatId,
-                Content = processedMessage.Content
+                Content = content
             });
 
             await AppState.NetworkClient.SendAsync(packet);
 
-            // Сохраняем в локальную БД обработанное сообщение
-            LocalDatabaseService.Instance.SaveMessage(processedMessage);
+            // Сохраняем в локальную БД ОРИГИНАЛЬНОЕ сообщение
+            LocalDatabaseService.Instance.SaveMessage(message);
         }
         catch (Exception ex)
         {
