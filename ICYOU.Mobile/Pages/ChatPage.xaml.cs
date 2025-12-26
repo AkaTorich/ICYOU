@@ -380,6 +380,33 @@ public partial class ChatPage : ContentPage
     /// </summary>
     private string CreateQuote(long messageId, string senderName, string content, string reply)
     {
+        // Извлекаем оригинальный URL из [LINKPREVIEW|...] если есть
+        if (content.Contains("[LINKPREVIEW|"))
+        {
+            try
+            {
+                var previewStart = content.IndexOf("[LINKPREVIEW|");
+                var previewEnd = content.IndexOf("]", previewStart);
+
+                if (previewEnd > previewStart)
+                {
+                    var textBefore = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
+                    var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                    var parts = previewData.Split('|');
+
+                    if (parts.Length >= 1)
+                    {
+                        var url = parts[0].Replace("{{PIPE}}", "|");
+                        content = string.IsNullOrEmpty(textBefore) ? url : $"{textBefore} {url}";
+                    }
+                }
+            }
+            catch
+            {
+                // Если не удалось распарсить - используем как есть
+            }
+        }
+
         // Убираем переносы строк из цитируемого контента
         var sanitizedContent = content.Replace("\n", " ").Replace("\r", "");
         return $"[QUOTE|{messageId}|{senderName}|{sanitizedContent}]{reply}";
