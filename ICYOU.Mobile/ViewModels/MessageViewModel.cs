@@ -75,6 +75,9 @@ public class MessageViewModel : INotifyPropertyChanged
         // Парсим контент
         var content = message.Content;
 
+        // Логируем входящее сообщение
+        System.Diagnostics.Debug.WriteLine($"[MessageViewModel] Original content: {content}");
+
         // Сначала проверяем формат [QUOTE|...] или [QUOTES|...]
         if (content.StartsWith("[QUOTE|") || content.StartsWith("[QUOTES|"))
         {
@@ -128,6 +131,8 @@ public class MessageViewModel : INotifyPropertyChanged
                         // Для парсинга превью используем оригинальный ReplyText (с тегом)
                         content = originalReplyText;
                     }
+
+                    System.Diagnostics.Debug.WriteLine($"[MessageViewModel] After quote parse: HasQuote={HasQuote}, QuoteSender='{QuoteSender}', QuoteContent='{QuoteContent}', ReplyText='{ReplyText}'");
                 }
             }
             catch
@@ -159,6 +164,8 @@ public class MessageViewModel : INotifyPropertyChanged
                         LinkPreviewDescription = parts[2].Replace("{{PIPE}}", "|");
                         LinkPreviewImageUrl = parts[3].Replace("{{PIPE}}", "|");
                         LinkPreviewSiteName = parts[4].Replace("{{PIPE}}", "|");
+
+                        System.Diagnostics.Debug.WriteLine($"[MessageViewModel] After preview parse: HasLinkPreview={HasLinkPreview}, URL='{LinkPreviewUrl}', Title='{LinkPreviewTitle}', TextBefore='{TextBeforePreview}'");
                     }
                 }
             }
@@ -167,6 +174,8 @@ public class MessageViewModel : INotifyPropertyChanged
                 HasLinkPreview = false;
             }
         }
+
+        System.Diagnostics.Debug.WriteLine($"[MessageViewModel] Final result: HasQuote={HasQuote}, HasLinkPreview={HasLinkPreview}, ReplyText='{ReplyText}'");
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
