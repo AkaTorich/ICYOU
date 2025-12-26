@@ -41,10 +41,11 @@ public class LinkPreviewModule : IModule, IModuleSettings
         _showDescription = context.Storage.Get("showDescription", true);
         _showImage = context.Storage.Get("showImage", true);
         _maxDescriptionLength = context.Storage.Get("maxDescLength", 150);
-        
-        // Перехватываем входящие сообщения для добавления превью
+
+        // Перехватываем входящие и исходящие сообщения для добавления превью
         context.MessageService.RegisterIncomingInterceptor(AddLinkPreview);
-        
+        context.MessageService.RegisterOutgoingInterceptor(AddLinkPreview);
+
         context.Logger.Info("Модуль превью ссылок инициализирован");
     }
     
