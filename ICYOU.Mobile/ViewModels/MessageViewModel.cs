@@ -112,7 +112,21 @@ public class MessageViewModel : INotifyPropertyChanged
                     // Проверяем, есть ли превью в ReplyText
                     if (ReplyText.Contains("[LINKPREVIEW|"))
                     {
-                        content = ReplyText; // Парсим превью из текста ответа
+                        // Сохраняем оригинальный ReplyText для парсинга превью
+                        var originalReplyText = ReplyText;
+
+                        // Убираем тег [LINKPREVIEW|...] из ReplyText для отображения
+                        var linkStart = ReplyText.IndexOf("[LINKPREVIEW|");
+                        var linkEnd = ReplyText.IndexOf("]", linkStart);
+                        if (linkEnd > linkStart)
+                        {
+                            var before = linkStart > 0 ? ReplyText.Substring(0, linkStart).Trim() : "";
+                            var after = linkEnd + 1 < ReplyText.Length ? ReplyText.Substring(linkEnd + 1).TrimStart() : "";
+                            ReplyText = string.IsNullOrEmpty(before) ? after : $"{before}\n{after}";
+                        }
+
+                        // Для парсинга превью используем оригинальный ReplyText (с тегом)
+                        content = originalReplyText;
                     }
                 }
             }
@@ -145,13 +159,6 @@ public class MessageViewModel : INotifyPropertyChanged
                         LinkPreviewDescription = parts[2].Replace("{{PIPE}}", "|");
                         LinkPreviewImageUrl = parts[3].Replace("{{PIPE}}", "|");
                         LinkPreviewSiteName = parts[4].Replace("{{PIPE}}", "|");
-                    }
-
-                    // Если есть цитата, обновляем ReplyText чтобы убрать тег превью и оставить только текст после
-                    if (HasQuote)
-                    {
-                        var textAfterPreview = previewEnd + 1 < content.Length ? content.Substring(previewEnd + 1).TrimStart() : "";
-                        ReplyText = string.IsNullOrEmpty(TextBeforePreview) ? textAfterPreview : $"{TextBeforePreview}\n{textAfterPreview}";
                     }
                 }
             }
