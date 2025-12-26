@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -91,10 +92,16 @@ public class LinkPreviewModule : IModule, IModuleSettings
     {
         try
         {
-            // Используем TryAddWithoutValidation для совместимости с Android
-            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
+            // Используем HttpWebRequest для совместимости с Android trimming
+            var request = WebRequest.CreateHttp(url);
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0";
+            request.Timeout = 5000;
 
-            var html = await _httpClient.GetStringAsync(url);
+            using var response = await request.GetResponseAsync();
+            using var stream = response.GetResponseStream();
+            using var reader = new StreamReader(stream);
+            var html = await reader.ReadToEndAsync();
+
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
             
