@@ -229,24 +229,27 @@ public partial class ChatPage : ContentPage
                 Status = MessageStatus.Sending
             };
 
-            // Добавляем в UI (ViewModel сам распарсит RAW формат [QUOTE|...])
-            var viewModel = new MessageViewModel(message);
+            // Обрабатываем исходящее сообщение через модули (LinkPreview добавит превью)
+            var processedMessage = ModuleManager.Instance.ProcessOutgoingMessage(message) ?? message;
+
+            // Добавляем в UI обработанное сообщение (ViewModel сам распарсит RAW формат [QUOTE|...] и [LINKPREVIEW|...])
+            var viewModel = new MessageViewModel(processedMessage);
             _messages.Add(viewModel);
 
             // Прокручиваем вниз
             MessagesList.ScrollTo(viewModel, position: ScrollToPosition.End, animate: true);
 
-            // Отправляем на сервер
+            // Отправляем на сервер обработанное сообщение
             var packet = new Packet(PacketType.SendMessage, new SendMessageData
             {
                 ChatId = _chatId,
-                Content = content
+                Content = processedMessage.Content
             });
 
             await AppState.NetworkClient.SendAsync(packet);
 
-            // Сохраняем в локальную БД
-            LocalDatabaseService.Instance.SaveMessage(message);
+            // Сохраняем в локальную БД обработанное сообщение
+            LocalDatabaseService.Instance.SaveMessage(processedMessage);
         }
         catch (Exception ex)
         {
