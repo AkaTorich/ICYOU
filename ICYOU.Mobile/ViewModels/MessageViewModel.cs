@@ -75,39 +75,8 @@ public class MessageViewModel : INotifyPropertyChanged
         // Парсим контент
         var content = message.Content;
 
-        // Проверяем формат [LINKPREVIEW|...]
-        if (content.Contains("[LINKPREVIEW|"))
-        {
-            try
-            {
-                var previewStart = content.IndexOf("[LINKPREVIEW|");
-                var previewEnd = content.IndexOf("]", previewStart);
-
-                if (previewEnd > previewStart)
-                {
-                    HasLinkPreview = true;
-                    TextBeforePreview = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
-
-                    var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
-                    var parts = previewData.Split('|');
-
-                    if (parts.Length >= 5)
-                    {
-                        LinkPreviewUrl = parts[0].Replace("{{PIPE}}", "|");
-                        LinkPreviewTitle = parts[1].Replace("{{PIPE}}", "|");
-                        LinkPreviewDescription = parts[2].Replace("{{PIPE}}", "|");
-                        LinkPreviewImageUrl = parts[3].Replace("{{PIPE}}", "|");
-                        LinkPreviewSiteName = parts[4].Replace("{{PIPE}}", "|");
-                    }
-                }
-            }
-            catch
-            {
-                HasLinkPreview = false;
-            }
-        }
-        // Проверяем формат [QUOTE|...] или [QUOTES|...]
-        else if (content.StartsWith("[QUOTE|") || content.StartsWith("[QUOTES|"))
+        // Сначала проверяем формат [QUOTE|...] или [QUOTES|...]
+        if (content.StartsWith("[QUOTE|") || content.StartsWith("[QUOTES|"))
         {
             try
             {
@@ -139,11 +108,56 @@ public class MessageViewModel : INotifyPropertyChanged
                             QuoteContent = "цитата";
                         }
                     }
+
+                    // Проверяем, есть ли превью в ReplyText
+                    if (ReplyText.Contains("[LINKPREVIEW|"))
+                    {
+                        content = ReplyText; // Парсим превью из текста ответа
+                    }
                 }
             }
             catch
             {
                 HasQuote = false;
+            }
+        }
+
+        // Проверяем формат [LINKPREVIEW|...] (либо в полном content, либо в ReplyText после цитаты)
+        if (content.Contains("[LINKPREVIEW|"))
+        {
+            try
+            {
+                var previewStart = content.IndexOf("[LINKPREVIEW|");
+                var previewEnd = content.IndexOf("]", previewStart);
+
+                if (previewEnd > previewStart)
+                {
+                    HasLinkPreview = true;
+                    TextBeforePreview = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
+
+                    var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                    var parts = previewData.Split('|');
+
+                    if (parts.Length >= 5)
+                    {
+                        LinkPreviewUrl = parts[0].Replace("{{PIPE}}", "|");
+                        LinkPreviewTitle = parts[1].Replace("{{PIPE}}", "|");
+                        LinkPreviewDescription = parts[2].Replace("{{PIPE}}", "|");
+                        LinkPreviewImageUrl = parts[3].Replace("{{PIPE}}", "|");
+                        LinkPreviewSiteName = parts[4].Replace("{{PIPE}}", "|");
+                    }
+
+                    // Если есть цитата, обновляем ReplyText чтобы убрать тег превью и оставить только текст после
+                    if (HasQuote)
+                    {
+                        var textAfterPreview = previewEnd + 1 < content.Length ? content.Substring(previewEnd + 1).TrimStart() : "";
+                        ReplyText = string.IsNullOrEmpty(TextBeforePreview) ? textAfterPreview : $"{TextBeforePreview}\n{textAfterPreview}";
+                    }
+                }
+            }
+            catch
+            {
+                HasLinkPreview = false;
             }
         }
     }
