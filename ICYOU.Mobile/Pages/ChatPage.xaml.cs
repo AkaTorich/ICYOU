@@ -154,6 +154,21 @@ public partial class ChatPage : ContentPage
         HideReplyPreview();
     }
 
+    private async void OnLinkPreviewTapped(object sender, TappedEventArgs e)
+    {
+        if (e.Parameter is MessageViewModel messageViewModel && !string.IsNullOrEmpty(messageViewModel.LinkPreviewUrl))
+        {
+            try
+            {
+                await Launcher.OpenAsync(new Uri(messageViewModel.LinkPreviewUrl));
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Ошибка открытия ссылки: {ex.Message}", false);
+            }
+        }
+    }
+
     private void ShowReplyPreview(MessageViewModel message)
     {
         _replyToMessage = message;
