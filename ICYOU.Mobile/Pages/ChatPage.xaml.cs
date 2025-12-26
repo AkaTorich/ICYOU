@@ -51,9 +51,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (нет сети)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
-                // ViewModel сам распарсит [QUOTE|...] и [LINKPREVIEW|...]
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
         }
@@ -66,8 +66,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (chatId=0)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
         }
@@ -90,10 +91,11 @@ public partial class ChatPage : ContentPage
                     DebugLog.Write($"[ChatPage] Получено {data.Messages.Count} сообщений с сервера (обычно 0 - сервер не хранит историю)");
                     foreach (var msg in data.Messages.OrderBy(m => m.Timestamp))
                     {
-                        // НЕ обрабатываем через модули - сообщения от сервера в RAW формате
-                        _messages.Add(new MessageViewModel(msg));
-                        // Сохраняем в локальную БД в RAW формате
+                        // Сохраняем ОРИГИНАЛ в БД
                         LocalDatabaseService.Instance.SaveMessage(msg);
+                        // Обрабатываем через модули для отображения
+                        var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                        _messages.Add(new MessageViewModel(processedMsg));
                     }
 
                     // Если сервер вернул пустую историю - загружаем из локальной БД
@@ -103,7 +105,9 @@ public partial class ChatPage : ContentPage
                         var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
                         foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
                         {
-                            _messages.Add(new MessageViewModel(msg));
+                            // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                            var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                            _messages.Add(new MessageViewModel(processedMsg));
                         }
                     }
 
@@ -125,8 +129,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Ошибка загрузки с сервера, загружаем {localMessages.Count} сообщений из локальной БД");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
         }
     }
@@ -147,21 +152,6 @@ public partial class ChatPage : ContentPage
     private void OnCancelReplyClicked(object sender, EventArgs e)
     {
         HideReplyPreview();
-    }
-
-    private async void OnLinkPreviewTapped(object sender, TappedEventArgs e)
-    {
-        if (e.Parameter is MessageViewModel messageViewModel && !string.IsNullOrEmpty(messageViewModel.LinkPreviewUrl))
-        {
-            try
-            {
-                await Launcher.OpenAsync(new Uri(messageViewModel.LinkPreviewUrl));
-            }
-            catch (Exception ex)
-            {
-                ShowStatus($"Ошибка открытия ссылки: {ex.Message}", false);
-            }
-        }
     }
 
     private void ShowReplyPreview(MessageViewModel message)
@@ -375,33 +365,6 @@ public partial class ChatPage : ContentPage
     /// </summary>
     private string CreateQuote(long messageId, string senderName, string content, string reply)
     {
-        // Извлекаем оригинальный URL из [LINKPREVIEW|...] если есть
-        if (content.Contains("[LINKPREVIEW|"))
-        {
-            try
-            {
-                var previewStart = content.IndexOf("[LINKPREVIEW|");
-                var previewEnd = content.IndexOf("]", previewStart);
-
-                if (previewEnd > previewStart)
-                {
-                    var textBefore = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
-                    var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
-                    var parts = previewData.Split('|');
-
-                    if (parts.Length >= 1)
-                    {
-                        var url = parts[0].Replace("{{PIPE}}", "|");
-                        content = string.IsNullOrEmpty(textBefore) ? url : $"{textBefore} {url}";
-                    }
-                }
-            }
-            catch
-            {
-                // Если не удалось распарсить - используем как есть
-            }
-        }
-
         // Убираем переносы строк из цитируемого контента
         var sanitizedContent = content.Replace("\n", " ").Replace("\r", "");
         return $"[QUOTE|{messageId}|{senderName}|{sanitizedContent}]{reply}";

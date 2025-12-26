@@ -74,9 +74,6 @@
                                            CornerRadius="8"
                                            HasShadow="False"
                                            MaximumWidthRequest="280">
-                                        <Frame.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="OnLinkPreviewTapped" CommandParameter="{Binding .}" />
-                                        </Frame.GestureRecognizers>
                                         <VerticalStackLayout Spacing="0">
                                             <!-- Картинка (если есть) -->
                                             <Image Source="{Binding LinkPreviewImageUrl}"
