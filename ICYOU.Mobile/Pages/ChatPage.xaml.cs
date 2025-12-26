@@ -51,9 +51,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (нет сети)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
-                // ViewModel сам распарсит [QUOTE|...] и [LINKPREVIEW|...]
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
         }
@@ -66,8 +66,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (chatId=0)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
             return;
         }
@@ -90,10 +91,11 @@ public partial class ChatPage : ContentPage
                     DebugLog.Write($"[ChatPage] Получено {data.Messages.Count} сообщений с сервера (обычно 0 - сервер не хранит историю)");
                     foreach (var msg in data.Messages.OrderBy(m => m.Timestamp))
                     {
-                        // НЕ обрабатываем через модули - сообщения от сервера в RAW формате
-                        _messages.Add(new MessageViewModel(msg));
-                        // Сохраняем в локальную БД в RAW формате
+                        // Сохраняем ОРИГИНАЛ в БД
                         LocalDatabaseService.Instance.SaveMessage(msg);
+                        // Обрабатываем через модули для отображения
+                        var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                        _messages.Add(new MessageViewModel(processedMsg));
                     }
 
                     // Если сервер вернул пустую историю - загружаем из локальной БД
@@ -103,7 +105,9 @@ public partial class ChatPage : ContentPage
                         var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
                         foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
                         {
-                            _messages.Add(new MessageViewModel(msg));
+                            // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                            var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                            _messages.Add(new MessageViewModel(processedMsg));
                         }
                     }
 
@@ -125,8 +129,9 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Ошибка загрузки с сервера, загружаем {localMessages.Count} сообщений из локальной БД");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // НЕ обрабатываем через модули - сообщения в БД уже в RAW формате
-                _messages.Add(new MessageViewModel(msg));
+                // Обрабатываем через модули (БД содержит оригинальные сообщения)
+                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                _messages.Add(new MessageViewModel(processedMsg));
             }
         }
     }
