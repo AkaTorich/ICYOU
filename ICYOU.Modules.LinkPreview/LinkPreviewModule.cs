@@ -24,7 +24,11 @@ public class LinkPreviewModule : IModule, IModuleSettings
     private bool _showImage = true;
     private int _maxDescriptionLength = 150;
     
-    private static readonly HttpClient _httpClient = new()
+    private static readonly HttpClient _httpClient = new(new SocketsHttpHandler
+    {
+        ConnectTimeout = TimeSpan.FromSeconds(5),
+        AutomaticDecompression = System.Net.DecompressionMethods.All
+    })
     {
         Timeout = TimeSpan.FromSeconds(5)
     };
@@ -92,16 +96,10 @@ public class LinkPreviewModule : IModule, IModuleSettings
     {
         try
         {
-            // Используем HttpWebRequest для совместимости с Android trimming
-            var request = WebRequest.CreateHttp(url);
-            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0";
-            request.Timeout = 5000;
+            // Используем SocketsHttpHandler для предотвращения trimming
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ICYOU/1.0");
 
-            using var response = await request.GetResponseAsync();
-            using var stream = response.GetResponseStream();
-            using var reader = new StreamReader(stream);
-            var html = await reader.ReadToEndAsync();
-
+            var html = await _httpClient.GetStringAsync(url);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
             
