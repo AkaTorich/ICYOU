@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="System.Net.Http">
+    <type fullname="System.Net.Http.HttpClient" preserve="all" />
+    <type fullname="System.Net.Http.HttpClientHandler" preserve="all" />
+  </assembly>
+  <assembly fullname="System.Threading.Tasks">
+    <type fullname="System.Threading.Tasks.Task" preserve="all" />
+  </assembly>
+</linker>
