@@ -249,13 +249,81 @@ public class MessageContentConverter : IValueConverter
                 quoteBox.Child = quoteGrid;
                 container.Children.Add(quoteBox);
             }
-            
+
             // Текст ответа
             if (!string.IsNullOrWhiteSpace(replyContent))
             {
-                container.Children.Add(CreateReplyTextElement(replyContent, textBrush));
+                // Убираем [LINKPREVIEW|...] из replyContent или показываем только текст
+                if (replyContent.Contains("[LINKPREVIEW|"))
+                {
+                    var previewStart = replyContent.IndexOf("[LINKPREVIEW|");
+                    var previewEnd = replyContent.IndexOf("]", previewStart);
+
+                    if (previewEnd > previewStart)
+                    {
+                        var textBefore = previewStart > 0 ? replyContent.Substring(0, previewStart).Trim() : "";
+                        var textAfter = previewEnd + 1 < replyContent.Length ? replyContent.Substring(previewEnd + 1).TrimStart() : "";
+
+                        // Парсим данные превью
+                        var previewData = replyContent.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                        var previewParts = previewData.Split('|');
+
+                        if (!string.IsNullOrEmpty(textBefore))
+                        {
+                            container.Children.Add(CreateReplyTextElement(textBefore, textBrush));
+                        }
+
+                        // Показываем только текст превью (title + description) без картинки
+                        if (previewParts.Length >= 3)
+                        {
+                            var title = previewParts[1].Replace("{{PIPE}}", "|");
+                            var description = previewParts[2].Replace("{{PIPE}}", "|");
+
+                            var previewTextPanel = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+                            if (!string.IsNullOrEmpty(title))
+                            {
+                                previewTextPanel.Children.Add(new TextBlock
+                                {
+                                    Text = "🔗 " + title,
+                                    FontSize = 12,
+                                    FontWeight = FontWeights.SemiBold,
+                                    Foreground = textBrush,
+                                    TextWrapping = TextWrapping.Wrap
+                                });
+                            }
+
+                            if (!string.IsNullOrEmpty(description))
+                            {
+                                previewTextPanel.Children.Add(new TextBlock
+                                {
+                                    Text = description,
+                                    FontSize = 11,
+                                    Foreground = Application.Current.Resources["TextSecondaryBrush"] as Brush ?? Brushes.Gray,
+                                    TextWrapping = TextWrapping.Wrap,
+                                    Margin = new Thickness(0, 2, 0, 0)
+                                });
+                            }
+
+                            container.Children.Add(previewTextPanel);
+                        }
+
+                        if (!string.IsNullOrEmpty(textAfter))
+                        {
+                            container.Children.Add(CreateReplyTextElement(textAfter, textBrush));
+                        }
+                    }
+                    else
+                    {
+                        container.Children.Add(CreateReplyTextElement(replyContent, textBrush));
+                    }
+                }
+                else
+                {
+                    container.Children.Add(CreateReplyTextElement(replyContent, textBrush));
+                }
             }
-            
+
             return container;
         }
         catch
@@ -263,7 +331,7 @@ public class MessageContentConverter : IValueConverter
             return CreateTextBlock(text, textBrush);
         }
     }
-    
+
     private FrameworkElement CreateQuoteContent(string text, Brush textBrush)
     {
         try
@@ -356,13 +424,81 @@ public class MessageContentConverter : IValueConverter
             
             quoteBox.Child = quoteGrid;
             container.Children.Add(quoteBox);
-            
+
             // Текст ответа
             if (!string.IsNullOrWhiteSpace(replyContent))
             {
-                container.Children.Add(CreateReplyTextElement(replyContent, textBrush));
+                // Убираем [LINKPREVIEW|...] из replyContent или показываем только текст
+                if (replyContent.Contains("[LINKPREVIEW|"))
+                {
+                    var previewStart = replyContent.IndexOf("[LINKPREVIEW|");
+                    var previewEnd = replyContent.IndexOf("]", previewStart);
+
+                    if (previewEnd > previewStart)
+                    {
+                        var textBefore = previewStart > 0 ? replyContent.Substring(0, previewStart).Trim() : "";
+                        var textAfter = previewEnd + 1 < replyContent.Length ? replyContent.Substring(previewEnd + 1).TrimStart() : "";
+
+                        // Парсим данные превью
+                        var previewData = replyContent.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                        var previewParts = previewData.Split('|');
+
+                        if (!string.IsNullOrEmpty(textBefore))
+                        {
+                            container.Children.Add(CreateReplyTextElement(textBefore, textBrush));
+                        }
+
+                        // Показываем только текст превью (title + description) без картинки
+                        if (previewParts.Length >= 3)
+                        {
+                            var title = previewParts[1].Replace("{{PIPE}}", "|");
+                            var description = previewParts[2].Replace("{{PIPE}}", "|");
+
+                            var previewTextPanel = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+                            if (!string.IsNullOrEmpty(title))
+                            {
+                                previewTextPanel.Children.Add(new TextBlock
+                                {
+                                    Text = "🔗 " + title,
+                                    FontSize = 12,
+                                    FontWeight = FontWeights.SemiBold,
+                                    Foreground = textBrush,
+                                    TextWrapping = TextWrapping.Wrap
+                                });
+                            }
+
+                            if (!string.IsNullOrEmpty(description))
+                            {
+                                previewTextPanel.Children.Add(new TextBlock
+                                {
+                                    Text = description,
+                                    FontSize = 11,
+                                    Foreground = Application.Current.Resources["TextSecondaryBrush"] as Brush ?? Brushes.Gray,
+                                    TextWrapping = TextWrapping.Wrap,
+                                    Margin = new Thickness(0, 2, 0, 0)
+                                });
+                            }
+
+                            container.Children.Add(previewTextPanel);
+                        }
+
+                        if (!string.IsNullOrEmpty(textAfter))
+                        {
+                            container.Children.Add(CreateReplyTextElement(textAfter, textBrush));
+                        }
+                    }
+                    else
+                    {
+                        container.Children.Add(CreateReplyTextElement(replyContent, textBrush));
+                    }
+                }
+                else
+                {
+                    container.Children.Add(CreateReplyTextElement(replyContent, textBrush));
+                }
             }
-            
+
             return container;
         }
         catch

@@ -23,6 +23,9 @@ public class MessageViewModel : INotifyPropertyChanged
     public string QuoteSender { get; } = "";
     public string QuoteContent { get; } = "";
     public string ReplyText { get; } = "";
+    public bool HasQuoteLinkPreview { get; } = false;
+    public string QuoteLinkPreviewTitle { get; } = "";
+    public string QuoteLinkPreviewDescription { get; } = "";
 
     // Свойства для превью ссылок
     public bool HasLinkPreview { get; }
@@ -162,21 +165,27 @@ public class MessageViewModel : INotifyPropertyChanged
                     // Проверяем, есть ли превью в ReplyText
                     if (ReplyText.Contains("[LINKPREVIEW|"))
                     {
-                        // Сохраняем оригинальный ReplyText для парсинга превью
-                        var originalReplyText = ReplyText;
-
-                        // Убираем тег [LINKPREVIEW|...] из ReplyText для отображения
                         var linkStart = ReplyText.IndexOf("[LINKPREVIEW|");
                         var linkEnd = ReplyText.IndexOf("]", linkStart);
                         if (linkEnd > linkStart)
                         {
                             var before = linkStart > 0 ? ReplyText.Substring(0, linkStart).Trim() : "";
                             var after = linkEnd + 1 < ReplyText.Length ? ReplyText.Substring(linkEnd + 1).TrimStart() : "";
-                            ReplyText = string.IsNullOrEmpty(before) ? after : $"{before}\n{after}";
-                        }
 
-                        // Для парсинга превью используем оригинальный ReplyText (с тегом)
-                        content = originalReplyText;
+                            // Парсим данные превью из цитаты
+                            var previewData = ReplyText.Substring(linkStart + 13, linkEnd - linkStart - 13);
+                            var parts = previewData.Split('|');
+
+                            if (parts.Length >= 3)
+                            {
+                                HasQuoteLinkPreview = true;
+                                QuoteLinkPreviewTitle = parts[1].Replace("{{PIPE}}", "|");
+                                QuoteLinkPreviewDescription = parts[2].Replace("{{PIPE}}", "|");
+                            }
+
+                            // Убираем тег из ReplyText
+                            ReplyText = string.IsNullOrEmpty(before) ? after : (string.IsNullOrEmpty(after) ? before : $"{before}\n{after}");
+                        }
                     }
 
                     DebugLog.Write($"[MessageViewModel] After quote parse: HasQuote={HasQuote}, QuoteSender='{QuoteSender}', QuoteContent='{QuoteContent}', ReplyText='{ReplyText}'");

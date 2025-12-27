@@ -121,6 +121,25 @@
                                        FontSize="14"
                                        LineBreakMode="WordWrap" />
 
+                                <!-- Если в цитате есть превью ссылки - показываем title и description -->
+                                <VerticalStackLayout IsVisible="{Binding HasQuoteLinkPreview}" Margin="0,6,0,0">
+                                    <Label FontSize="12"
+                                           FontAttributes="Bold"
+                                           LineBreakMode="WordWrap">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="🔗 " />
+                                                <Span Text="{Binding QuoteLinkPreviewTitle}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Text="{Binding QuoteLinkPreviewDescription}"
+                                           FontSize="11"
+                                           TextColor="#666666"
+                                           LineBreakMode="WordWrap"
+                                           Margin="0,2,0,0" />
+                                </VerticalStackLayout>
+
                                 <!-- Если нет цитаты и нет превью - показываем полный Content -->
                                 <Label IsVisible="{Binding ShowFullContent}"
                                        Text="{Binding Content}"
