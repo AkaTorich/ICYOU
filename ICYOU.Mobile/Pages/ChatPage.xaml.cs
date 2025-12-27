@@ -12,7 +12,8 @@ public partial class ChatPage : ContentPage
     private readonly ObservableCollection<MessageViewModel> _messages = new();
     private ChatViewModel? _chatViewModel;
     private long _chatId;
-    private MessageViewModel? _replyToMessage;
+    private readonly List<MessageViewModel> _quotedMessages = new();
+    private const int MaxQuotes = 3;
 
     public ChatViewModel? ChatViewModel
     {
@@ -167,17 +168,71 @@ public partial class ChatPage : ContentPage
 
     private void ShowReplyPreview(MessageViewModel message)
     {
-        _replyToMessage = message;
-        ReplyToSenderLabel.Text = message.SenderName;
-        ReplyToContentLabel.Text = message.Content;
-        ReplyPreviewPanel.IsVisible = true;
+        // Проверяем не добавлено ли уже это сообщение
+        if (_quotedMessages.Any(q => q.Message.Id == message.Message.Id))
+            return;
+
+        // Если уже 3 цитаты - заменяем последнюю
+        if (_quotedMessages.Count >= MaxQuotes)
+        {
+            _quotedMessages.RemoveAt(MaxQuotes - 1);
+        }
+
+        _quotedMessages.Add(message);
+        UpdateQuotePanel();
         MessageInput.Focus();
     }
 
     private void HideReplyPreview()
     {
-        _replyToMessage = null;
+        _quotedMessages.Clear();
         ReplyPreviewPanel.IsVisible = false;
+    }
+
+    private void UpdateQuotePanel()
+    {
+        if (_quotedMessages.Count == 0)
+        {
+            ReplyPreviewPanel.IsVisible = false;
+            return;
+        }
+
+        ReplyPreviewPanel.IsVisible = true;
+
+        // Формируем текст для отображения
+        if (_quotedMessages.Count == 1)
+        {
+            ReplyToSenderLabel.Text = _quotedMessages[0].SenderName;
+            ReplyToContentLabel.Text = GetQuotePreview(_quotedMessages[0].Content);
+        }
+        else
+        {
+            ReplyToSenderLabel.Text = $"Цитаты ({_quotedMessages.Count})";
+            var lines = new List<string>();
+            foreach (var qm in _quotedMessages)
+            {
+                var content = GetQuotePreview(qm.Content);
+                var preview = $"{qm.SenderName}: {content}";
+                if (preview.Length > 50)
+                    preview = preview.Substring(0, 47) + "...";
+                lines.Add(preview);
+            }
+            ReplyToContentLabel.Text = string.Join("\n", lines);
+        }
+    }
+
+    private string GetQuotePreview(string content)
+    {
+        // Убираем теги для превью
+        if (content.StartsWith("[QUOTE|") || content.StartsWith("[QUOTES|"))
+        {
+            var endQuote = content.IndexOf(']');
+            if (endQuote > 0)
+                content = content.Substring(endQuote + 1);
+        }
+        if (content.Length > 40)
+            return content.Substring(0, 37) + "...";
+        return content;
     }
 
     private async Task SendMessage()
@@ -193,15 +248,30 @@ public partial class ChatPage : ContentPage
             return;
         }
 
-        // Если это цитата, форматируем
-        if (_replyToMessage != null)
+        // Если есть цитируемые сообщения - добавляем формат цитат
+        if (_quotedMessages.Count > 0)
         {
-            content = CreateQuote(
-                _replyToMessage.Message.Id,
-                _replyToMessage.SenderName,
-                _replyToMessage.Content,
-                content
-            );
+            var quoteParts = new List<string>();
+            foreach (var qm in _quotedMessages)
+            {
+                var quotedContent = qm.Content;
+                // Убираем вложенные цитаты
+                if (quotedContent.StartsWith("[QUOTE|") || quotedContent.StartsWith("[QUOTES|"))
+                {
+                    var endQ = quotedContent.IndexOf(']');
+                    if (endQ > 0) quotedContent = quotedContent.Substring(endQ + 1);
+                }
+                // Заменяем разделители в контенте
+                quotedContent = quotedContent.Replace("~", "-").Replace("|", "/");
+                // Обрезаем длинные цитаты
+                if (quotedContent.Length > 80)
+                    quotedContent = quotedContent.Substring(0, 77) + "...";
+
+                // Формат каждой цитаты: sender~content
+                quoteParts.Add($"{qm.SenderName}~{quotedContent}");
+            }
+            // Формат: [QUOTES|quote1|quote2|quote3]текст (разделитель между цитатами |)
+            content = $"[QUOTES|{string.Join("|", quoteParts)}]{content}";
             HideReplyPreview();
         }
 
@@ -370,14 +440,4 @@ public partial class ChatPage : ContentPage
         });
     }
 
-    /// <summary>
-    /// Создаёт строку цитаты для отправки
-    /// Формат: [QUOTE|MessageId|SenderName|Content]ваш ответ
-    /// </summary>
-    private string CreateQuote(long messageId, string senderName, string content, string reply)
-    {
-        // Убираем переносы строк из цитируемого контента
-        var sanitizedContent = content.Replace("\n", " ").Replace("\r", "");
-        return $"[QUOTE|{messageId}|{senderName}|{sanitizedContent}]{reply}";
-    }
 }

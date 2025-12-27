@@ -191,8 +191,8 @@
                     <Label x:Name="ReplyToContentLabel"
                            FontSize="12"
                            TextColor="Gray"
-                           LineBreakMode="TailTruncation"
-                           MaxLines="2" />
+                           LineBreakMode="WordWrap"
+                           MaxLines="5" />
                 </VerticalStackLayout>
 
                 <Button Grid.Column="2"
