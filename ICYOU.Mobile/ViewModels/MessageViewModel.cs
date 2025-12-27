@@ -123,13 +123,39 @@ public class MessageViewModel : INotifyPropertyChanged
                     }
                     else
                     {
-                        // Формат: [QUOTES|MessageId~SenderName]reply
+                        // Формат: [QUOTES|sender~content|sender~content|...]reply
                         var quoteData = content.Substring(8, endQuote - 8);
-                        var parts = quoteData.Split('~', 2);
-                        if (parts.Length >= 2)
+                        // Разбиваем по | на отдельные цитаты
+                        var quoteParts = quoteData.Split('|');
+                        if (quoteParts.Length >= 1)
                         {
-                            QuoteSender = parts[1];
-                            QuoteContent = "цитата";
+                            // Берём первую цитату
+                            var firstQuote = quoteParts[0].Split('~', 2);
+                            if (firstQuote.Length >= 2)
+                            {
+                                QuoteSender = firstQuote[0];
+                                QuoteContent = firstQuote[1];
+                            }
+
+                            // Если цитат больше одной - показываем счётчик
+                            if (quoteParts.Length > 1)
+                            {
+                                QuoteSender = $"Цитаты ({quoteParts.Length})";
+                                // Формируем список всех цитат для превью
+                                var lines = new List<string>();
+                                foreach (var quotePart in quoteParts)
+                                {
+                                    var parts = quotePart.Split('~', 2);
+                                    if (parts.Length >= 2)
+                                    {
+                                        var preview = $"{parts[0]}: {parts[1]}";
+                                        if (preview.Length > 40)
+                                            preview = preview.Substring(0, 37) + "...";
+                                        lines.Add(preview);
+                                    }
+                                }
+                                QuoteContent = string.Join("\n", lines);
+                            }
                         }
                     }
 
