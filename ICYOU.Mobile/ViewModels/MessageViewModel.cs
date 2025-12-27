@@ -84,8 +84,28 @@ public class MessageViewModel : INotifyPropertyChanged
         {
             try
             {
-                var endQuote = content.IndexOf(']');
-                if (endQuote > 0)
+                int endQuote;
+
+                if (content.StartsWith("[QUOTE|"))
+                {
+                    // Для формата [QUOTE|...] нужно учитывать вложенные скобки
+                    // Подсчитываем открывающие [ и закрывающие ]
+                    int bracketCount = 1; // [QUOTE уже открыта
+                    endQuote = 7; // начинаем после [QUOTE|
+                    while (endQuote < content.Length && bracketCount > 0)
+                    {
+                        if (content[endQuote] == '[') bracketCount++;
+                        else if (content[endQuote] == ']') bracketCount--;
+                        if (bracketCount > 0) endQuote++;
+                    }
+                }
+                else
+                {
+                    // Для формата [QUOTES|...] просто ищем первый ]
+                    endQuote = content.IndexOf(']');
+                }
+
+                if (endQuote > 0 && endQuote < content.Length)
                 {
                     HasQuote = true;
                     ReplyText = content.Substring(endQuote + 1).TrimStart();
