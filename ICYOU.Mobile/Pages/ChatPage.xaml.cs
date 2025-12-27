@@ -51,9 +51,8 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (нет сети)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // Обрабатываем через модули (БД содержит оригинальные сообщения)
-                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                _messages.Add(new MessageViewModel(processedMsg));
+                // БД содержит уже обработанные сообщения - не обрабатываем повторно
+                _messages.Add(new MessageViewModel(msg));
             }
             return;
         }
@@ -66,9 +65,8 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Загрузка {localMessages.Count} сообщений из локальной БД (chatId=0)");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // Обрабатываем через модули (БД содержит оригинальные сообщения)
-                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                _messages.Add(new MessageViewModel(processedMsg));
+                // БД содержит уже обработанные сообщения - не обрабатываем повторно
+                _messages.Add(new MessageViewModel(msg));
             }
             return;
         }
@@ -91,10 +89,10 @@ public partial class ChatPage : ContentPage
                     DebugLog.Write($"[ChatPage] Получено {data.Messages.Count} сообщений с сервера (обычно 0 - сервер не хранит историю)");
                     foreach (var msg in data.Messages.OrderBy(m => m.Timestamp))
                     {
-                        // Сохраняем ОРИГИНАЛ в БД
-                        LocalDatabaseService.Instance.SaveMessage(msg);
                         // Обрабатываем через модули для отображения
                         var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
+                        // Сохраняем ОБРАБОТАННОЕ сообщение в БД
+                        LocalDatabaseService.Instance.SaveMessage(processedMsg);
                         _messages.Add(new MessageViewModel(processedMsg));
                     }
 
@@ -105,9 +103,8 @@ public partial class ChatPage : ContentPage
                         var localMessages = LocalDatabaseService.Instance.GetMessages(_chatId);
                         foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
                         {
-                            // Обрабатываем через модули (БД содержит оригинальные сообщения)
-                            var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                            _messages.Add(new MessageViewModel(processedMsg));
+                            // БД содержит уже обработанные сообщения - не обрабатываем повторно
+                            _messages.Add(new MessageViewModel(msg));
                         }
                     }
 
@@ -129,9 +126,8 @@ public partial class ChatPage : ContentPage
             DebugLog.Write($"[ChatPage] Ошибка загрузки с сервера, загружаем {localMessages.Count} сообщений из локальной БД");
             foreach (var msg in localMessages.OrderBy(m => m.Timestamp))
             {
-                // Обрабатываем через модули (БД содержит оригинальные сообщения)
-                var processedMsg = ModuleManager.Instance.ProcessIncomingMessage(msg) ?? msg;
-                _messages.Add(new MessageViewModel(processedMsg));
+                // БД содержит уже обработанные сообщения - не обрабатываем повторно
+                _messages.Add(new MessageViewModel(msg));
             }
         }
     }
@@ -268,8 +264,8 @@ public partial class ChatPage : ContentPage
 
             await AppState.NetworkClient.SendAsync(packet);
 
-            // Сохраняем в локальную БД ОРИГИНАЛЬНОЕ сообщение
-            LocalDatabaseService.Instance.SaveMessage(message);
+            // Сохраняем в локальную БД ОБРАБОТАННОЕ сообщение (как на Desktop)
+            LocalDatabaseService.Instance.SaveMessage(processedMessage);
         }
         catch (Exception ex)
         {
@@ -314,10 +310,6 @@ public partial class ChatPage : ContentPage
                         var originalContent = message.Content;
                         DebugLog.Write($"[ChatPage] Получено новое сообщение: {originalContent.Substring(0, Math.Min(50, originalContent.Length))}");
 
-                        // Сохраняем ОРИГИНАЛ в БД (до обработки модулями)
-                        // Чтобы при следующей загрузке из БД не было дублирования [LINKPREVIEW|...]
-                        LocalDatabaseService.Instance.SaveMessage(message);
-
                         // Обрабатываем сообщение через модули для отображения
                         var processedMessage = ModuleManager.Instance.ProcessIncomingMessage(message) ?? message;
 
@@ -329,6 +321,10 @@ public partial class ChatPage : ContentPage
                         {
                             DebugLog.Write($"[ChatPage] Новое сообщение НЕ изменено модулями");
                         }
+
+                        // Сохраняем ОБРАБОТАННОЕ сообщение в БД (как на Desktop)
+                        // При загрузке из БД модули не нужно применять повторно
+                        LocalDatabaseService.Instance.SaveMessage(processedMessage);
 
                         // Проверяем, нет ли уже этого сообщения
                         if (!_messages.Any(m => m.Message.Id == processedMessage.Id))

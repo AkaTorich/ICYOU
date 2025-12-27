@@ -59,6 +59,10 @@ public class LinkPreviewModule : IModule, IModuleSettings
         if (!_enabled) return message;
         if (message.Type != MessageType.Text) return message;
 
+        // Если уже есть [LINKPREVIEW|...] - не добавляем повторно
+        if (message.Content.Contains("[LINKPREVIEW|"))
+            return message;
+
         // Ищем ссылки в сообщении
         var matches = UrlRegex.Matches(message.Content);
         if (matches.Count == 0) return message;
