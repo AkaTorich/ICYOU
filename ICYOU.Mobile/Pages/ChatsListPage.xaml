@@ -25,21 +25,40 @@
                 <DataTemplate x:DataType="vm:ChatViewModel">
                     <Grid Padding="10" ColumnDefinitions="50,*,Auto">
 
-                        <!-- Avatar -->
-                        <Frame Grid.Column="0"
-                               WidthRequest="50"
-                               HeightRequest="50"
-                               CornerRadius="25"
-                               Padding="0"
-                               HasShadow="False"
-                               BackgroundColor="{Binding StatusColor}">
-                            <Label Text="{Binding AvatarLetter}"
-                                   FontSize="20"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
-                        </Frame>
+                        <!-- Avatar with Status Indicator -->
+                        <Grid Grid.Column="0" WidthRequest="50" HeightRequest="50">
+                            <!-- Avatar Circle -->
+                            <Frame WidthRequest="50"
+                                   HeightRequest="50"
+                                   CornerRadius="25"
+                                   Padding="0"
+                                   HasShadow="False"
+                                   BackgroundColor="#CCCCCC">
+                                <Label Text="{Binding AvatarLetter}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Frame>
+
+                            <!-- Status Indicator (small circle) -->
+                            <Frame IsVisible="{Binding IsFriend}"
+                                   WidthRequest="14"
+                                   HeightRequest="14"
+                                   CornerRadius="7"
+                                   Padding="0"
+                                   HasShadow="False"
+                                   BackgroundColor="{Binding StatusColor}"
+                                   BorderColor="White"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="End"
+                                   Margin="0,0,2,2">
+                                <Frame.Stroke>
+                                    <SolidColorBrush Color="White" />
+                                </Frame.Stroke>
+                            </Frame>
+                        </Grid>
 
                         <!-- Chat Info -->
                         <VerticalStackLayout Grid.Column="1" Padding="10,0" VerticalOptions="Center">

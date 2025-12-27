@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ICYOU.Core.Protocol;
 
 namespace ICYOU.Mobile;
 
@@ -60,6 +61,9 @@ public partial class App : Application
 			var window = new Window(shell);
 			System.Diagnostics.Debug.WriteLine("[APP] Window created successfully");
 
+			// Обрабатываем закрытие окна для отправки Logout
+			window.Destroying += OnWindowDestroying;
+
 			// Показываем LoginPage модально, если пользователь не залогинен
 			MainThread.BeginInvokeOnMainThread(async () =>
 			{
@@ -95,6 +99,35 @@ public partial class App : Application
 			catch { }
 
 			throw;
+		}
+	}
+
+	private void OnWindowDestroying(object? sender, EventArgs e)
+	{
+		try
+		{
+			System.Diagnostics.Debug.WriteLine("[APP] Window destroying, sending logout...");
+
+			// Отправляем Logout пакет на сервер при закрытии приложения
+			if (AppState.NetworkClient != null && AppState.CurrentUser != null)
+			{
+				try
+				{
+					var logoutPacket = new Packet(PacketType.Logout);
+					AppState.NetworkClient.SendAsync(logoutPacket).Wait(1000); // Ждём максимум 1 секунду
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"[APP] Error sending logout on destroy: {ex.Message}");
+				}
+
+				AppState.NetworkClient.Disconnect();
+				AppState.NetworkClient = null;
+			}
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"[APP] Error in OnWindowDestroying: {ex.Message}");
 		}
 	}
 }
