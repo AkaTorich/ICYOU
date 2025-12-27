@@ -1274,9 +1274,27 @@ public class MessageViewModel
 {
     public Message Message { get; }
     private readonly long _currentUserId;
-    
+
     public string SenderName => Message.SenderName;
-    public string Content => Message.Content;
+
+    // Обработанный контент без тегов
+    public string Content { get; }
+
+    // Свойства для цитат
+    public bool HasQuote { get; }
+    public string QuoteSender { get; } = "";
+    public string QuoteContent { get; } = "";
+    public string ReplyText { get; } = "";
+
+    // Свойства для превью ссылок
+    public bool HasLinkPreview { get; }
+    public string LinkPreviewUrl { get; } = "";
+    public string LinkPreviewTitle { get; } = "";
+    public string LinkPreviewDescription { get; } = "";
+
+    // Вспомогательные свойства
+    public bool ShowFullContent => !HasQuote && !HasLinkPreview;
+
     public string TimeString => Message.Timestamp.ToLocalTime().ToString("HH:mm");
     public bool IsOwn => Message.SenderId == _currentUserId;
     public HorizontalAlignment Alignment => IsOwn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
@@ -1287,19 +1305,19 @@ public class MessageViewModel
             if (IsOwn)
             {
                 // Свои сообщения
-                return Application.Current.Resources["OwnMessageBrush"] as Brush ?? 
+                return Application.Current.Resources["OwnMessageBrush"] as Brush ??
                        new SolidColorBrush(Color.FromRgb(45, 90, 39));
             }
             else
             {
                 // Чужие сообщения
-                return Application.Current.Resources["OtherMessageBrush"] as Brush ?? 
+                return Application.Current.Resources["OtherMessageBrush"] as Brush ??
                        new SolidColorBrush(Color.FromRgb(61, 61, 61));
             }
         }
     }
     public Visibility SenderVisibility => IsOwn ? Visibility.Collapsed : Visibility.Visible;
-    
+
     // Статус сообщения (галочки) - только для своих сообщений
     public string StatusIcon => IsOwn ? Message.Status switch
     {
@@ -1309,17 +1327,158 @@ public class MessageViewModel
         MessageStatus.Read => "✓✓",        // Две галочки - прочитано
         _ => "✓"
     } : "";
-    
+
     public Visibility StatusVisibility => IsOwn ? Visibility.Visible : Visibility.Collapsed;
-    
-    public Brush StatusColor => Message.Status == MessageStatus.Read 
+
+    public Brush StatusColor => Message.Status == MessageStatus.Read
         ? new SolidColorBrush(Color.FromRgb(52, 183, 241))  // Синий для прочитанных
         : (Application.Current.Resources["TextSecondaryBrush"] as Brush ?? Brushes.Gray);
-    
+
     public MessageViewModel(Message message, long currentUserId)
     {
         Message = message;
         _currentUserId = currentUserId;
+
+        // Парсим контент
+        var content = message.Content;
+
+        // Проверяем формат [QUOTE|...] или [QUOTES|...]
+        if (content.StartsWith("[QUOTE|") || content.StartsWith("[QUOTES|"))
+        {
+            try
+            {
+                int endQuote;
+
+                if (content.StartsWith("[QUOTE|"))
+                {
+                    // Подсчитываем открывающие [ и закрывающие ]
+                    int bracketCount = 1;
+                    endQuote = 7; // начинаем после [QUOTE|
+                    while (endQuote < content.Length && bracketCount > 0)
+                    {
+                        if (content[endQuote] == '[') bracketCount++;
+                        else if (content[endQuote] == ']') bracketCount--;
+                        if (bracketCount > 0) endQuote++;
+                    }
+                }
+                else
+                {
+                    // Для формата [QUOTES|...] просто ищем первый ]
+                    endQuote = content.IndexOf(']');
+                }
+
+                if (endQuote > 0 && endQuote < content.Length)
+                {
+                    HasQuote = true;
+                    ReplyText = content.Substring(endQuote + 1).TrimStart();
+
+                    if (content.StartsWith("[QUOTE|"))
+                    {
+                        // Формат: [QUOTE|MessageId|SenderName|Content]reply
+                        var quoteData = content.Substring(7, endQuote - 7);
+                        var parts = quoteData.Split('|');
+                        if (parts.Length >= 3)
+                        {
+                            QuoteSender = parts[1];
+                            QuoteContent = parts[2];
+                        }
+                    }
+                    else
+                    {
+                        // Формат: [QUOTES|sender~content|sender~content|...]reply
+                        var quoteData = content.Substring(8, endQuote - 8);
+                        var quoteParts = quoteData.Split('|');
+                        if (quoteParts.Length >= 1)
+                        {
+                            // Берём первую цитату
+                            var firstQuote = quoteParts[0].Split(new[] { '~' }, 2);
+                            if (firstQuote.Length >= 2)
+                            {
+                                QuoteSender = firstQuote[0];
+                                QuoteContent = firstQuote[1];
+                            }
+
+                            // Если цитат больше одной - показываем счётчик
+                            if (quoteParts.Length > 1)
+                            {
+                                QuoteSender = $"Цитаты ({quoteParts.Length})";
+                                // Формируем список всех цитат для превью
+                                var lines = new List<string>();
+                                foreach (var quotePart in quoteParts)
+                                {
+                                    var parts = quotePart.Split(new[] { '~' }, 2);
+                                    if (parts.Length >= 2)
+                                    {
+                                        var preview = $"{parts[0]}: {parts[1]}";
+                                        if (preview.Length > 40)
+                                            preview = preview.Substring(0, 37) + "...";
+                                        lines.Add(preview);
+                                    }
+                                }
+                                QuoteContent = string.Join("\n", lines);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                HasQuote = false;
+            }
+        }
+
+        // Проверяем формат [LINKPREVIEW|...]
+        if (content.Contains("[LINKPREVIEW|"))
+        {
+            try
+            {
+                var previewStart = content.IndexOf("[LINKPREVIEW|");
+                var previewEnd = content.IndexOf("]", previewStart);
+
+                if (previewEnd > previewStart)
+                {
+                    HasLinkPreview = true;
+
+                    var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                    var parts = previewData.Split('|');
+
+                    if (parts.Length >= 5)
+                    {
+                        LinkPreviewUrl = parts[0].Replace("{{PIPE}}", "|");
+                        LinkPreviewTitle = parts[1].Replace("{{PIPE}}", "|");
+                        LinkPreviewDescription = parts[2].Replace("{{PIPE}}", "|");
+                    }
+
+                    // Убираем тег [LINKPREVIEW|...] из контента для отображения
+                    var before = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
+                    var after = previewEnd + 1 < content.Length ? content.Substring(previewEnd + 1).TrimStart() : "";
+
+                    if (HasQuote)
+                    {
+                        // Убираем тег из ReplyText
+                        var linkStart = ReplyText.IndexOf("[LINKPREVIEW|");
+                        var linkEnd = ReplyText.IndexOf("]", linkStart);
+                        if (linkEnd > linkStart)
+                        {
+                            before = linkStart > 0 ? ReplyText.Substring(0, linkStart).Trim() : "";
+                            after = linkEnd + 1 < ReplyText.Length ? ReplyText.Substring(linkEnd + 1).TrimStart() : "";
+                            ReplyText = string.IsNullOrEmpty(before) ? after : (string.IsNullOrEmpty(after) ? before : $"{before}\n{after}");
+                        }
+                    }
+                    else
+                    {
+                        content = string.IsNullOrEmpty(before) ? after : (string.IsNullOrEmpty(after) ? before : $"{before}\n{after}");
+                    }
+                }
+            }
+            catch
+            {
+                HasLinkPreview = false;
+            }
+        }
+
+        // Финальный контент
+        Content = HasQuote ? ReplyText : content;
     }
 }
 
