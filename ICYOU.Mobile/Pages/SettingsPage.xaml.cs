@@ -1,5 +1,6 @@
 using ICYOU.Mobile.Services;
 using ICYOU.SDK;
+using ICYOU.Core.Protocol;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -141,9 +142,25 @@ public partial class SettingsPage : ContentPage
     {
         try
         {
-            // Отключаемся от сервера
-            AppState.NetworkClient?.Disconnect();
-            AppState.NetworkClient = null;
+            // Отправляем Logout пакет на сервер
+            if (AppState.NetworkClient != null)
+            {
+                try
+                {
+                    var logoutPacket = new Packet(PacketType.Logout);
+                    await AppState.NetworkClient.SendAsync(logoutPacket);
+                    await Task.Delay(200); // Даём время на отправку
+                }
+                catch (Exception ex)
+                {
+                    DebugLog.Write($"[SettingsPage] Error sending logout packet: {ex.Message}");
+                }
+
+                // Отключаемся от сервера
+                AppState.NetworkClient.Disconnect();
+                AppState.NetworkClient = null;
+            }
+
             AppState.CurrentUser = null;
             AppState.SessionToken = null;
 

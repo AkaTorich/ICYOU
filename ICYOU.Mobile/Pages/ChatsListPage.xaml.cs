@@ -182,9 +182,33 @@ public partial class ChatsListPage : ContentPage
                     RebuildList();
                     break;
 
+                case PacketType.UserStatusChanged:
+                    // Обновляем статус конкретного пользователя (оптимизированно, как в Desktop)
+                    var statusData = packet.GetData<UserStatusChangedData>();
+                    if (statusData != null)
+                    {
+                        // Находим друга в локальном списке
+                        var friend = _friends.FirstOrDefault(f => f.Id == statusData.UserId);
+                        if (friend != null)
+                        {
+                            // Обновляем статус в объекте друга
+                            friend.Status = statusData.Status;
+
+                            // Обновляем UI для этого контакта
+                            var chatVm = _allChats.FirstOrDefault(c => c.Friend?.Id == statusData.UserId);
+                            if (chatVm != null)
+                            {
+                                chatVm.UpdateStatus();
+                            }
+
+                            // Пересортировываем список (онлайн друзья вверху)
+                            RefreshList();
+                        }
+                    }
+                    break;
+
                 case PacketType.FriendRequest:
                 case PacketType.FriendRequestResponse:
-                case PacketType.UserStatusChanged:
                     // Обновляем список друзей
                     await LoadFriends();
                     RebuildList();

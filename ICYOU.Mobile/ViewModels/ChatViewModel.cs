@@ -141,6 +141,13 @@ public class ChatViewModel : INotifyPropertyChanged
         _unreadCount = chat?.UnreadCount ?? 0;
     }
 
+    public void UpdateStatus()
+    {
+        OnPropertyChanged(nameof(IsOnline));
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(StatusColor));
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
