@@ -197,8 +197,8 @@ public class MessageViewModel : INotifyPropertyChanged
             }
         }
 
-        // Проверяем формат [LINKPREVIEW|...] (либо в полном content, либо в ReplyText после цитаты)
-        if (content.Contains("[LINKPREVIEW|"))
+        // Проверяем формат [LINKPREVIEW|...] (только если нет цитаты, т.к. превью в цитате уже обработано выше)
+        if (!HasQuote && content.Contains("[LINKPREVIEW|"))
         {
             try
             {
