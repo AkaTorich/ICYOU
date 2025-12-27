@@ -742,12 +742,39 @@ public partial class MainWindow : Window
                     var endQ = quotedContent.IndexOf(']');
                     if (endQ > 0) quotedContent = quotedContent.Substring(endQ + 1);
                 }
+                // Убираем превью ссылок
+                if (quotedContent.Contains("[LINKPREVIEW|"))
+                {
+                    var previewStart = quotedContent.IndexOf("[LINKPREVIEW|");
+                    var previewEnd = quotedContent.IndexOf("]", previewStart);
+                    if (previewEnd > previewStart)
+                    {
+                        var before = previewStart > 0 ? quotedContent.Substring(0, previewStart).Trim() : "";
+                        var after = previewEnd + 1 < quotedContent.Length ? quotedContent.Substring(previewEnd + 1).TrimStart() : "";
+
+                        if (!string.IsNullOrEmpty(before))
+                        {
+                            quotedContent = before;
+                        }
+                        else if (!string.IsNullOrEmpty(after))
+                        {
+                            quotedContent = after;
+                        }
+                        else
+                        {
+                            var previewData = quotedContent.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                            var parts = previewData.Split('|');
+                            if (parts.Length >= 2)
+                                quotedContent = "🔗 " + parts[1].Replace("{{PIPE}}", "|");
+                        }
+                    }
+                }
                 // Заменяем разделители в контенте
                 quotedContent = quotedContent.Replace("~", "-").Replace("|", "/");
                 // Обрезаем длинные цитаты
                 if (quotedContent.Length > 80)
                     quotedContent = quotedContent.Substring(0, 77) + "...";
-                
+
                 // Формат каждой цитаты: sender~content
                 quoteParts.Add($"{qm.Message.SenderName}~{quotedContent}");
             }
@@ -865,6 +892,36 @@ public partial class MainWindow : Window
             var endQuote = content.IndexOf(']');
             if (endQuote > 0)
                 content = content.Substring(endQuote + 1);
+        }
+        // Обработка превью ссылок
+        if (content.Contains("[LINKPREVIEW|"))
+        {
+            var previewStart = content.IndexOf("[LINKPREVIEW|");
+            var previewEnd = content.IndexOf("]", previewStart);
+            if (previewEnd > previewStart)
+            {
+                var before = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
+                var after = previewEnd + 1 < content.Length ? content.Substring(previewEnd + 1).TrimStart() : "";
+
+                // Если есть текст до превью - используем его
+                if (!string.IsNullOrEmpty(before))
+                {
+                    content = before;
+                }
+                // Если есть текст после - используем его
+                else if (!string.IsNullOrEmpty(after))
+                {
+                    content = after;
+                }
+                // Иначе берем title из превью
+                else
+                {
+                    var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                    var parts = previewData.Split('|');
+                    if (parts.Length >= 2)
+                        content = "🔗 " + parts[1].Replace("{{PIPE}}", "|"); // 🔗 title
+                }
+            }
         }
         return content.Length > 40 ? content.Substring(0, 37) + "..." : content;
     }
