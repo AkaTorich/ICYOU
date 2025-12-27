@@ -172,10 +172,39 @@ public class MessageContentConverter : IValueConverter
             {
                 var parts = quotePart.Split('~', 2);
                 if (parts.Length < 2) continue;
-                
+
                 var sender = parts[0];
                 var content = parts[1];
-                
+
+                // Убираем теги [LINKPREVIEW|...] из цитируемого контента
+                if (content.Contains("[LINKPREVIEW|"))
+                {
+                    var previewStart = content.IndexOf("[LINKPREVIEW|");
+                    var previewEnd = content.IndexOf("]", previewStart);
+                    if (previewEnd > previewStart)
+                    {
+                        var before = previewStart > 0 ? content.Substring(0, previewStart).Trim() : "";
+                        var after = previewEnd + 1 < content.Length ? content.Substring(previewEnd + 1).TrimStart() : "";
+
+                        if (!string.IsNullOrEmpty(before))
+                        {
+                            content = before;
+                        }
+                        else if (!string.IsNullOrEmpty(after))
+                        {
+                            content = after;
+                        }
+                        else
+                        {
+                            // Берем title из превью
+                            var previewData = content.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                            var previewParts = previewData.Split('|');
+                            if (previewParts.Length >= 2)
+                                content = "🔗 " + previewParts[1].Replace("{{PIPE}}", "|");
+                        }
+                    }
+                }
+
                 // Блок цитаты
                 var quoteBox = new Border
                 {
@@ -250,7 +279,36 @@ public class MessageContentConverter : IValueConverter
             var quotedSender = parts[1];
             var quotedContent = parts[2];
             var replyContent = text.Substring(endQuote + 1).TrimStart();
-            
+
+            // Убираем теги [LINKPREVIEW|...] из цитируемого контента
+            if (quotedContent.Contains("[LINKPREVIEW|"))
+            {
+                var previewStart = quotedContent.IndexOf("[LINKPREVIEW|");
+                var previewEnd = quotedContent.IndexOf("]", previewStart);
+                if (previewEnd > previewStart)
+                {
+                    var before = previewStart > 0 ? quotedContent.Substring(0, previewStart).Trim() : "";
+                    var after = previewEnd + 1 < quotedContent.Length ? quotedContent.Substring(previewEnd + 1).TrimStart() : "";
+
+                    if (!string.IsNullOrEmpty(before))
+                    {
+                        quotedContent = before;
+                    }
+                    else if (!string.IsNullOrEmpty(after))
+                    {
+                        quotedContent = after;
+                    }
+                    else
+                    {
+                        // Берем title из превью
+                        var previewData = quotedContent.Substring(previewStart + 13, previewEnd - previewStart - 13);
+                        var previewParts = previewData.Split('|');
+                        if (previewParts.Length >= 2)
+                            quotedContent = "🔗 " + previewParts[1].Replace("{{PIPE}}", "|");
+                    }
+                }
+            }
+
             var container = new StackPanel();
             
             // Блок цитаты
