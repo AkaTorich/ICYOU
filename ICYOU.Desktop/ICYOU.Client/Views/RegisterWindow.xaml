@@ -1,0 +1,66 @@
+<Window x:Class="ICYOU.Client.Views.RegisterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ICYOU - Регистрация" 
+        Height="620" Width="420"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundBrush}">
+    
+    <Grid>
+        <Border Background="{StaticResource SurfaceBrush}" 
+                CornerRadius="16" 
+                Margin="30"
+                Padding="30">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Регистрация" 
+                           Style="{StaticResource HeaderStyle}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,30"/>
+                
+                <!-- Имя пользователя -->
+                <TextBlock Text="Имя пользователя (логин)" Style="{StaticResource LabelStyle}"/>
+                <TextBox x:Name="Username" 
+                         Style="{StaticResource ModernTextBox}"
+                         Margin="0,0,0,15"/>
+                
+                <!-- Отображаемое имя -->
+                <TextBlock Text="Отображаемое имя" Style="{StaticResource LabelStyle}"/>
+                <TextBox x:Name="DisplayName" 
+                         Style="{StaticResource ModernTextBox}"
+                         Margin="0,0,0,15"/>
+                
+                <!-- Пароль -->
+                <TextBlock Text="Пароль" Style="{StaticResource LabelStyle}"/>
+                <PasswordBox x:Name="Password" 
+                             Style="{StaticResource ModernPasswordBox}"
+                             Margin="0,0,0,15"/>
+                
+                <!-- Подтверждение пароля -->
+                <TextBlock Text="Подтвердите пароль" Style="{StaticResource LabelStyle}"/>
+                <PasswordBox x:Name="PasswordConfirm" 
+                             Style="{StaticResource ModernPasswordBox}"
+                             Margin="0,0,0,20"/>
+                
+                <!-- Ошибка -->
+                <TextBlock x:Name="ErrorText" 
+                           Foreground="{StaticResource ErrorBrush}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,15"
+                           Visibility="Collapsed"/>
+                
+                <!-- Кнопки -->
+                <Button x:Name="RegisterButton" 
+                        Content="Зарегистрироваться" 
+                        Style="{StaticResource PrimaryButton}"
+                        Click="RegisterButton_Click"
+                        Margin="0,0,0,10"/>
+                
+                <Button Content="Отмена" 
+                        Style="{StaticResource SecondaryButton}"
+                        Click="CancelButton_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
+

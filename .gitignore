@@ -3,9 +3,6 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Desktop project (separate repository)
-ICYOU.Desktop/
-
 # User-specific files
 *.rsuser
 *.suo
@@ -541,3 +538,36 @@ logs/
 *~
 .sass-cache
 .directory
+
+##
+## Desktop-specific runtime files
+##
+# Пользовательские данные (БД, настройки)
+ICYOU.Desktop/**/userdata/
+**/userdata/*.db
+**/userdata/*.db-shm
+**/userdata/*.db-wal
+
+# Загруженные файлы
+ICYOU.Desktop/**/Downloads/
+
+# Логи Desktop приложения
+ICYOU.Desktop/**/debug.log
+ICYOU.Desktop/**/*.log
+
+# Динамически загружаемые модули (копии из build)
+ICYOU.Desktop/modules/*.dll
+ICYOU.Desktop/modules/*.pdb
+
+# Пользовательские смайлики и ресурсы
+ICYOU.Desktop/emotes/*
+!ICYOU.Desktop/emotes/.gitkeep
+
+# SQLite базы данных
+*.db
+*.db-shm
+*.db-wal
+
+# Готовые сборки Linux сервера (собираются из исходников)
+ICYOU.Desktop/ICYOU.Server.Linux/publish_linux/
+ICYOU.Desktop/ICYOU.Server.Linux/libs/
