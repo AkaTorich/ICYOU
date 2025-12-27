@@ -570,4 +570,5 @@ ICYOU.Desktop/emotes/*
 
 # Готовые сборки Linux сервера (собираются из исходников)
 ICYOU.Desktop/ICYOU.Server.Linux/publish_linux/
+ICYOU.Desktop/ICYOU.Server.Linux/publish_linux.zip
 ICYOU.Desktop/ICYOU.Server.Linux/libs/
