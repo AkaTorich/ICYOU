@@ -90,15 +90,17 @@ public class SettingsService
 
         try
         {
-            // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
-            var emotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
+            // Сначала копируем базовые паки из Resources
+            Task.Run(async () => await EnsureBasePacksCopiedAsync()).Wait();
+
+            // Читаем паки из AppDataDirectory
+            var emotesPath = Path.Combine(FileSystem.AppDataDirectory, "emotes");
             DebugLog.Write($"[SettingsService] Looking for emotes at: {emotesPath}");
-            DebugLog.Write($"[SettingsService] Directory exists: {Directory.Exists(emotesPath)}");
 
             if (Directory.Exists(emotesPath))
             {
                 var dirs = Directory.GetDirectories(emotesPath);
-                DebugLog.Write($"[SettingsService] Found {dirs.Length} directories");
+                DebugLog.Write($"[SettingsService] Found {dirs.Length} pack directories");
 
                 foreach (var dir in dirs)
                 {
@@ -109,16 +111,7 @@ public class SettingsService
             }
             else
             {
-                DebugLog.Write($"[SettingsService] AppContext.BaseDirectory: {AppContext.BaseDirectory}");
-                DebugLog.Write($"[SettingsService] Listing BaseDirectory contents:");
-
-                if (Directory.Exists(AppContext.BaseDirectory))
-                {
-                    foreach (var item in Directory.GetFileSystemEntries(AppContext.BaseDirectory))
-                    {
-                        DebugLog.Write($"[SettingsService]   - {Path.GetFileName(item)}");
-                    }
-                }
+                DebugLog.Write($"[SettingsService] Emotes directory doesn't exist yet");
             }
         }
         catch (Exception ex)
@@ -129,12 +122,38 @@ public class SettingsService
         return packs;
     }
 
+    private async Task EnsureBasePacksCopiedAsync()
+    {
+        try
+        {
+            // Копируем default и kolobok если их еще нет
+            foreach (var packName in new[] { "default", "kolobok" })
+            {
+                var targetPackPath = Path.Combine(FileSystem.AppDataDirectory, "emotes", packName);
+
+                // Если уже скопирован - пропускаем
+                if (Directory.Exists(targetPackPath))
+                    continue;
+
+                DebugLog.Write($"[SettingsService] Initializing pack '{packName}'...");
+
+                // Вызываем EmoteService для копирования
+                EmoteService.Instance.LoadEmotes(packName);
+                await Task.Delay(100); // Даём время на копирование
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[SettingsService] Error in EnsureBasePacksCopiedAsync: {ex.Message}");
+        }
+    }
+
     public string? GetCurrentEmotePackPath()
     {
         if (string.IsNullOrEmpty(_settings.EmotePack) || _settings.EmotePack == "(По умолчанию)")
             return null;
 
-        var packPath = Path.Combine(AppContext.BaseDirectory, "emotes", _settings.EmotePack);
+        var packPath = Path.Combine(FileSystem.AppDataDirectory, "emotes", _settings.EmotePack);
         return Directory.Exists(packPath) ? packPath : null;
     }
 }

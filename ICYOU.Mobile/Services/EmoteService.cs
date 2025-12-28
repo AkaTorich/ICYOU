@@ -18,62 +18,103 @@ public class EmoteService
     public IReadOnlyDictionary<string, string> Emotes => _emotes;
     public string? CurrentPack => _currentPack;
 
-    public void LoadEmotes(string? packName = null)
+    public async void LoadEmotes(string? packName = null)
     {
         _emotes.Clear();
         _cachedImages.Clear();
 
-        // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
-        var baseEmotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
-        DebugLog.Write($"[EmoteService] Base emotes path: {baseEmotesPath}");
-        DebugLog.Write($"[EmoteService] Directory exists: {Directory.Exists(baseEmotesPath)}");
+        // В MAUI смайлы копируются из Resources/Raw в AppDataDirectory
+        var targetEmotesPath = Path.Combine(FileSystem.AppDataDirectory, "emotes");
+        DebugLog.Write($"[EmoteService] Target emotes path: {targetEmotesPath}");
 
-        // Если указан конкретный пак - загружаем только его
-        if (!string.IsNullOrEmpty(packName) && packName != "(По умолчанию)")
+        // Определяем какой пак загружать
+        var selectedPack = string.IsNullOrEmpty(packName) || packName == "(По умолчанию)" ? "default" : packName;
+        DebugLog.Write($"[EmoteService] Selected pack: {selectedPack}");
+
+        // Копируем смайлы из Resources если их еще нет
+        await EnsureEmotesCopiedAsync(selectedPack);
+
+        // Загружаем смайлы из AppDataDirectory
+        var packPath = Path.Combine(targetEmotesPath, selectedPack);
+        if (Directory.Exists(packPath))
         {
-            var packPath = Path.Combine(baseEmotesPath, packName);
-            DebugLog.Write($"[EmoteService] Loading pack '{packName}' from: {packPath}");
-
-            if (Directory.Exists(packPath))
-            {
-                _emotesPath = packPath;
-                _currentPack = packName;
-                LoadFromDirectory(packPath);
-                DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from pack '{packName}'");
-                return;
-            }
-            else
-            {
-                DebugLog.Write($"[EmoteService] Pack directory '{packName}' not found");
-            }
-        }
-
-        // Иначе загружаем смайлы из пака "default"
-        var defaultPackPath = Path.Combine(baseEmotesPath, "default");
-        DebugLog.Write($"[EmoteService] Trying default pack at: {defaultPackPath}");
-
-        if (Directory.Exists(defaultPackPath))
-        {
-            _emotesPath = defaultPackPath;
-            _currentPack = "default";
-            LoadFromDirectory(defaultPackPath);
-            DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from default pack");
+            _emotesPath = packPath;
+            _currentPack = selectedPack;
+            LoadFromDirectory(packPath);
+            DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from pack '{selectedPack}'");
         }
         else
         {
-            DebugLog.Write($"[EmoteService] Default pack not found, trying base directory");
-            // Если нет default, загружаем из корневой папки emotes
-            _emotesPath = baseEmotesPath;
-            _currentPack = null;
-            if (Directory.Exists(baseEmotesPath))
+            DebugLog.Write($"[EmoteService] Pack directory not found: {packPath}");
+        }
+    }
+
+    private async Task EnsureEmotesCopiedAsync(string packName)
+    {
+        try
+        {
+            var targetPackPath = Path.Combine(FileSystem.AppDataDirectory, "emotes", packName);
+
+            // Если уже скопированы - пропускаем
+            if (Directory.Exists(targetPackPath) && Directory.GetFiles(targetPackPath, "*.gif").Length > 0)
             {
-                LoadFromDirectory(baseEmotesPath);
-                DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from base directory");
+                DebugLog.Write($"[EmoteService] Pack '{packName}' already copied");
+                return;
             }
-            else
+
+            DebugLog.Write($"[EmoteService] Copying pack '{packName}' from Resources...");
+            Directory.CreateDirectory(targetPackPath);
+
+            // Читаем список файлов из emotes.txt
+            var manifestPath = $"emotes/{packName}/emotes.txt";
+            var emoteNames = new List<string>();
+
+            try
             {
-                DebugLog.Write($"[EmoteService] No emotes found - base directory doesn't exist");
+                using var stream = await FileSystem.OpenAppPackageFileAsync(manifestPath);
+                using var reader = new StreamReader(stream);
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        emoteNames.Add(line.Trim());
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                DebugLog.Write($"[EmoteService] Error reading manifest for pack '{packName}': {ex.Message}");
+                return;
+            }
+
+            DebugLog.Write($"[EmoteService] Found {emoteNames.Count} emotes in manifest");
+
+            // Копируем каждый файл
+            int copied = 0;
+            foreach (var emoteName in emoteNames)
+            {
+                try
+                {
+                    var sourcePath = $"emotes/{packName}/{emoteName}.gif";
+                    var targetPath = Path.Combine(targetPackPath, $"{emoteName}.gif");
+
+                    using var sourceStream = await FileSystem.OpenAppPackageFileAsync(sourcePath);
+                    using var fileStream = File.Create(targetPath);
+                    await sourceStream.CopyToAsync(fileStream);
+                    copied++;
+                }
+                catch (Exception ex)
+                {
+                    DebugLog.Write($"[EmoteService] Error copying {emoteName}: {ex.Message}");
+                }
+            }
+
+            DebugLog.Write($"[EmoteService] Copied {copied}/{emoteNames.Count} emotes for pack '{packName}'");
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[EmoteService] Error in EnsureEmotesCopiedAsync: {ex.Message}");
         }
     }
 
