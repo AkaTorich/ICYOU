@@ -64,14 +64,9 @@ public class EmoteService
 
         try
         {
-            // Копируем смайлы из bundled resources
-            var bundledEmotesPath = Path.Combine(FileSystem.Current.AppPackageDirectory, "emotes");
-
-            if (!Directory.Exists(bundledEmotesPath))
-            {
-                // Пробуем альтернативный путь
-                bundledEmotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
-            }
+            // Копируем смайлы из bundled resources (Resources/Raw)
+            // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
+            var bundledEmotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
 
             if (Directory.Exists(bundledEmotesPath))
             {
