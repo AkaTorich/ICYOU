@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ICYOU.SDK;
 
 namespace ICYOU.Mobile.Services;
 
@@ -24,36 +25,54 @@ public class EmoteService
 
         // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
         var baseEmotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
+        DebugLog.Write($"[EmoteService] Base emotes path: {baseEmotesPath}");
+        DebugLog.Write($"[EmoteService] Directory exists: {Directory.Exists(baseEmotesPath)}");
 
         // Если указан конкретный пак - загружаем только его
         if (!string.IsNullOrEmpty(packName) && packName != "(По умолчанию)")
         {
             var packPath = Path.Combine(baseEmotesPath, packName);
+            DebugLog.Write($"[EmoteService] Loading pack '{packName}' from: {packPath}");
+
             if (Directory.Exists(packPath))
             {
                 _emotesPath = packPath;
                 _currentPack = packName;
                 LoadFromDirectory(packPath);
+                DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from pack '{packName}'");
                 return;
+            }
+            else
+            {
+                DebugLog.Write($"[EmoteService] Pack directory '{packName}' not found");
             }
         }
 
         // Иначе загружаем смайлы из пака "default"
         var defaultPackPath = Path.Combine(baseEmotesPath, "default");
+        DebugLog.Write($"[EmoteService] Trying default pack at: {defaultPackPath}");
+
         if (Directory.Exists(defaultPackPath))
         {
             _emotesPath = defaultPackPath;
             _currentPack = "default";
             LoadFromDirectory(defaultPackPath);
+            DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from default pack");
         }
         else
         {
+            DebugLog.Write($"[EmoteService] Default pack not found, trying base directory");
             // Если нет default, загружаем из корневой папки emotes
             _emotesPath = baseEmotesPath;
             _currentPack = null;
             if (Directory.Exists(baseEmotesPath))
             {
                 LoadFromDirectory(baseEmotesPath);
+                DebugLog.Write($"[EmoteService] Loaded {_emotes.Count} emotes from base directory");
+            }
+            else
+            {
+                DebugLog.Write($"[EmoteService] No emotes found - base directory doesn't exist");
             }
         }
     }

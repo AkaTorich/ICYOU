@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using Microsoft.Maui.Storage;
+using ICYOU.SDK;
 
 namespace ICYOU.Mobile.Services;
 
@@ -86,15 +87,43 @@ public class SettingsService
     public List<string> GetAvailableEmotePacks()
     {
         var packs = new List<string> { "(По умолчанию)" };
-        // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
-        var emotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
 
-        if (Directory.Exists(emotesPath))
+        try
         {
-            foreach (var dir in Directory.GetDirectories(emotesPath))
+            // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
+            var emotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
+            DebugLog.Write($"[SettingsService] Looking for emotes at: {emotesPath}");
+            DebugLog.Write($"[SettingsService] Directory exists: {Directory.Exists(emotesPath)}");
+
+            if (Directory.Exists(emotesPath))
             {
-                packs.Add(Path.GetFileName(dir));
+                var dirs = Directory.GetDirectories(emotesPath);
+                DebugLog.Write($"[SettingsService] Found {dirs.Length} directories");
+
+                foreach (var dir in dirs)
+                {
+                    var packName = Path.GetFileName(dir);
+                    DebugLog.Write($"[SettingsService] Found pack: {packName}");
+                    packs.Add(packName);
+                }
             }
+            else
+            {
+                DebugLog.Write($"[SettingsService] AppContext.BaseDirectory: {AppContext.BaseDirectory}");
+                DebugLog.Write($"[SettingsService] Listing BaseDirectory contents:");
+
+                if (Directory.Exists(AppContext.BaseDirectory))
+                {
+                    foreach (var item in Directory.GetFileSystemEntries(AppContext.BaseDirectory))
+                    {
+                        DebugLog.Write($"[SettingsService]   - {Path.GetFileName(item)}");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[SettingsService] Error in GetAvailableEmotePacks: {ex.Message}");
         }
 
         return packs;
