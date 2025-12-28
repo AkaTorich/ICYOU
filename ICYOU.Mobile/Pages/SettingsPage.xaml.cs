@@ -50,8 +50,74 @@ public partial class SettingsPage : ContentPage
         NotifySoundsSwitch.IsToggled = AppState.NotifySounds;
         NotifyFriendsSwitch.IsToggled = AppState.NotifyFriends;
 
+        // Emote Packs
+        LoadEmotePacks();
+
         // Modules
         LoadModules();
+    }
+
+    private void LoadEmotePacks()
+    {
+        try
+        {
+            var settings = SettingsService.Instance.Settings;
+            var availablePacks = SettingsService.GetAvailableEmotePacks();
+
+            EmotePackPicker.ItemsSource = availablePacks;
+
+            // Устанавливаем текущий выбранный пак
+            var currentPack = settings.EmotePack ?? "(По умолчанию)";
+            var index = availablePacks.IndexOf(currentPack);
+            if (index >= 0)
+            {
+                EmotePackPicker.SelectedIndex = index;
+            }
+            else
+            {
+                EmotePackPicker.SelectedIndex = 0; // По умолчанию
+            }
+
+            UpdateEmotePackInfo();
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[SettingsPage] Error loading emote packs: {ex.Message}");
+        }
+    }
+
+    private void UpdateEmotePackInfo()
+    {
+        try
+        {
+            var selectedPack = EmotePackPicker.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selectedPack))
+            {
+                EmotePackInfoLabel.Text = "Паки находятся в папке emotes/";
+                return;
+            }
+
+            var packPath = SettingsService.GetCurrentEmotePackPath();
+            if (Directory.Exists(packPath))
+            {
+                var emoteFiles = Directory.GetFiles(packPath, "*.*")
+                    .Where(f => f.EndsWith(".gif") || f.EndsWith(".png") ||
+                               f.EndsWith(".jpg") || f.EndsWith(".jpeg") ||
+                               f.EndsWith(".webp"))
+                    .Count();
+
+                EmotePackInfoLabel.Text = $"Путь: {packPath}\nСмайлов: {emoteFiles}";
+            }
+            else
+            {
+                EmotePackInfoLabel.Text = "Папка пака не найдена";
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[SettingsPage] Error updating emote pack info: {ex.Message}");
+            EmotePackInfoLabel.Text = "Ошибка получения информации о паке";
+        }
     }
 
     private void LoadModules()
@@ -117,6 +183,34 @@ public partial class SettingsPage : ContentPage
     private void OnNotifyFriendsToggled(object sender, ToggledEventArgs e)
     {
         AppState.NotifyFriends = e.Value;
+    }
+
+    private void OnEmotePackChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            var selectedPack = EmotePackPicker.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selectedPack))
+                return;
+
+            // Сохраняем выбранный пак в настройках
+            var settings = SettingsService.Instance.Settings;
+            settings.EmotePack = selectedPack;
+            SettingsService.Instance.Save();
+
+            // Загружаем смайлы из нового пака
+            EmoteService.Instance.LoadEmotes(selectedPack);
+
+            // Обновляем информацию о паке
+            UpdateEmotePackInfo();
+
+            DebugLog.Write($"[SettingsPage] Emote pack changed to: {selectedPack}");
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[SettingsPage] Error changing emote pack: {ex.Message}");
+            ShowStatus($"Ошибка смены пака: {ex.Message}", false);
+        }
     }
 
     private void OnClearCacheClicked(object sender, EventArgs e)

@@ -8,6 +8,15 @@ using Microsoft.Maui.Graphics;
 
 namespace ICYOU.Mobile.ViewModels;
 
+// Класс для элемента контента (текст или смайл)
+public class ContentPart
+{
+    public bool IsEmote { get; set; }
+    public string Text { get; set; } = "";
+    public string EmoteCode { get; set; } = "";
+    public ImageSource? EmoteImage { get; set; }
+}
+
 public class MessageViewModel : INotifyPropertyChanged
 {
     public Message Message { get; }
@@ -17,6 +26,12 @@ public class MessageViewModel : INotifyPropertyChanged
     public string SenderName => Message.SenderName;
 
     public string Content => Message.Content;
+
+    // Свойства для смайлов
+    public bool HasEmotes { get; }
+    public List<ContentPart> ContentParts { get; } = new();
+    public List<ContentPart> ReplyTextParts { get; } = new();
+    public List<ContentPart> QuoteContentParts { get; } = new();
 
     // Свойства для цитат
     public bool HasQuote { get; }
@@ -232,6 +247,90 @@ public class MessageViewModel : INotifyPropertyChanged
         }
 
         DebugLog.Write($"[MessageViewModel] Final result: HasQuote={HasQuote}, HasLinkPreview={HasLinkPreview}, ReplyText='{ReplyText}'");
+
+        // Парсим смайлы в основном контенте
+        if (ShowFullContent)
+        {
+            ContentParts.AddRange(ParseContentWithEmotes(Content));
+            HasEmotes = ContentParts.Any(p => p.IsEmote);
+        }
+
+        // Парсим смайлы в ReplyText (если есть цитата)
+        if (HasQuote && !string.IsNullOrEmpty(ReplyText))
+        {
+            ReplyTextParts.AddRange(ParseContentWithEmotes(ReplyText));
+        }
+
+        // Парсим смайлы в QuoteContent
+        if (HasQuote && !string.IsNullOrEmpty(QuoteContent))
+        {
+            QuoteContentParts.AddRange(ParseContentWithEmotes(QuoteContent));
+        }
+    }
+
+    private List<ContentPart> ParseContentWithEmotes(string text)
+    {
+        var parts = new List<ContentPart>();
+
+        try
+        {
+            var emoteService = EmoteService.Instance;
+            var emotes = emoteService.FindEmotesInText(text);
+
+            if (emotes.Count == 0)
+            {
+                // Нет смайлов - возвращаем просто текст
+                parts.Add(new ContentPart { IsEmote = false, Text = text });
+                return parts;
+            }
+
+            int lastIndex = 0;
+
+            foreach (var (start, length, code) in emotes)
+            {
+                // Добавляем текст до смайла
+                if (start > lastIndex)
+                {
+                    var textBefore = text.Substring(lastIndex, start - lastIndex);
+                    parts.Add(new ContentPart { IsEmote = false, Text = textBefore });
+                }
+
+                // Добавляем смайл
+                var emoteImage = emoteService.GetEmoteImage(code);
+                if (emoteImage != null)
+                {
+                    parts.Add(new ContentPart
+                    {
+                        IsEmote = true,
+                        EmoteCode = code,
+                        EmoteImage = emoteImage
+                    });
+                }
+                else
+                {
+                    // Если изображение не загрузилось - показываем код
+                    parts.Add(new ContentPart { IsEmote = false, Text = code });
+                }
+
+                lastIndex = start + length;
+            }
+
+            // Добавляем оставшийся текст после последнего смайла
+            if (lastIndex < text.Length)
+            {
+                var textAfter = text.Substring(lastIndex);
+                parts.Add(new ContentPart { IsEmote = false, Text = textAfter });
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[MessageViewModel] Error parsing emotes: {ex.Message}");
+            // В случае ошибки возвращаем весь текст как есть
+            parts.Clear();
+            parts.Add(new ContentPart { IsEmote = false, Text = text });
+        }
+
+        return parts;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

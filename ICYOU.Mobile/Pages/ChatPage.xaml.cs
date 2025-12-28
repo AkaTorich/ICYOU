@@ -35,10 +35,28 @@ public partial class ChatPage : ContentPage
         InitializeComponent();
         MessagesList.ItemsSource = _messages;
 
+        // Загружаем смайлы из текущего пака
+        LoadEmotes();
+
         // Подписка на новые сообщения
         if (AppState.NetworkClient != null)
         {
             AppState.NetworkClient.PacketReceived += OnPacketReceived;
+        }
+    }
+
+    private void LoadEmotes()
+    {
+        try
+        {
+            var settings = SettingsService.Instance.Settings;
+            var packName = settings.EmotePack;
+            EmoteService.Instance.LoadEmotes(packName);
+            DebugLog.Write($"[ChatPage] Emotes loaded from pack: {packName ?? "(По умолчанию)"}");
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] Error loading emotes: {ex.Message}");
         }
     }
 
@@ -414,6 +432,117 @@ public partial class ChatPage : ContentPage
         catch (Exception ex)
         {
             ShowStatus($"Ошибка выбора файла: {ex.Message}", false);
+        }
+    }
+
+    private void OnEmotesButtonClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            if (EmotesPanel.IsVisible)
+            {
+                EmotesPanel.IsVisible = false;
+            }
+            else
+            {
+                LoadEmotesToPanel();
+                EmotesPanel.IsVisible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] Error toggling emotes panel: {ex.Message}");
+            ShowStatus($"Ошибка открытия смайлов: {ex.Message}", false);
+        }
+    }
+
+    private void OnEmotesPanelBackgroundTapped(object sender, EventArgs e)
+    {
+        EmotesPanel.IsVisible = false;
+    }
+
+    private void LoadEmotesToPanel()
+    {
+        try
+        {
+            EmotesFlexLayout.Children.Clear();
+
+            var emoteService = EmoteService.Instance;
+            var emotes = emoteService.Emotes;
+
+            if (emotes.Count == 0)
+            {
+                var noEmotesLabel = new Label
+                {
+                    Text = "Смайлы не найдены",
+                    FontSize = 14,
+                    TextColor = Colors.Gray,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Margin = new Thickness(0, 20, 0, 0)
+                };
+                EmotesFlexLayout.Children.Add(noEmotesLabel);
+                return;
+            }
+
+            foreach (var kvp in emotes)
+            {
+                var code = kvp.Key;
+                var path = kvp.Value;
+
+                var button = new Button
+                {
+                    WidthRequest = 50,
+                    HeightRequest = 50,
+                    Padding = 0,
+                    Margin = new Thickness(5),
+                    BackgroundColor = Colors.Transparent,
+                    BorderColor = Colors.LightGray,
+                    BorderWidth = 1,
+                    CornerRadius = 8
+                };
+
+                try
+                {
+                    var emoteImage = emoteService.GetEmoteImage(code);
+                    if (emoteImage != null)
+                    {
+                        var image = new Image
+                        {
+                            Source = emoteImage,
+                            WidthRequest = 40,
+                            HeightRequest = 40,
+                            Aspect = Aspect.AspectFit,
+                            IsAnimationPlaying = true
+                        };
+                        button.Content = image;
+                    }
+                    else
+                    {
+                        button.Text = code;
+                        button.FontSize = 10;
+                    }
+                }
+                catch
+                {
+                    button.Text = code;
+                    button.FontSize = 10;
+                }
+
+                button.Clicked += (s, e) =>
+                {
+                    MessageInput.Text += code;
+                    EmotesPanel.IsVisible = false;
+                    MessageInput.Focus();
+                };
+
+                EmotesFlexLayout.Children.Add(button);
+            }
+
+            DebugLog.Write($"[ChatPage] Loaded {emotes.Count} emotes to panel");
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] Error loading emotes to panel: {ex.Message}");
         }
     }
 

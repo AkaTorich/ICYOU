@@ -46,6 +46,27 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Emote Pack Section -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Пак смайлов" FontSize="18" FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Выбрать пак:" VerticalOptions="Center" />
+                        <Picker x:Name="EmotePackPicker"
+                                Grid.Column="1"
+                                SelectedIndexChanged="OnEmotePackChanged"
+                                WidthRequest="150"
+                                VerticalOptions="Center" />
+                    </Grid>
+
+                    <Label x:Name="EmotePackInfoLabel"
+                           FontSize="12"
+                           TextColor="Gray"
+                           Text="Паки находятся в папке emotes/" />
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Modules Section -->
             <Frame BorderColor="LightGray" Padding="15" x:Name="ModulesFrame">
                 <VerticalStackLayout Spacing="10">
