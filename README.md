@@ -285,7 +285,7 @@ AkaTorich - main developer, creator
 
 ## Благодарность
 
-Author	Aiwan
-Author email	aiwan@yandex.ru
-Author website	kolobok.us
+- Author of kolobok emticons "Aiwan"
+- Author email mailto:aiwan@yandex.ru
+- Author website https://kolobok.us
 
