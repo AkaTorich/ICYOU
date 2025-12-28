@@ -494,29 +494,39 @@ public partial class ChatPage : ContentPage
                     var emoteImage = emoteService.GetEmoteImage(code);
                     if (emoteImage != null)
                     {
-                        // Используем ImageButton для смайлов с изображением
-                        var imageButton = new ImageButton
+                        // Используем Image с анимацией внутри Frame
+                        var image = new Image
                         {
                             Source = emoteImage,
+                            WidthRequest = 40,
+                            HeightRequest = 40,
+                            Aspect = Aspect.AspectFit,
+                            IsAnimationPlaying = true
+                        };
+
+                        var frame = new Frame
+                        {
+                            Content = image,
                             WidthRequest = 50,
                             HeightRequest = 50,
                             Padding = 5,
                             Margin = new Thickness(5),
                             BackgroundColor = Colors.Transparent,
                             BorderColor = Colors.LightGray,
-                            BorderWidth = 1,
                             CornerRadius = 8,
-                            Aspect = Aspect.AspectFit
+                            HasShadow = false
                         };
 
-                        imageButton.Clicked += (s, e) =>
+                        var tapGesture = new TapGestureRecognizer();
+                        tapGesture.Tapped += (s, e) =>
                         {
                             MessageInput.Text += code;
                             EmotesPanel.IsVisible = false;
                             MessageInput.Focus();
                         };
+                        frame.GestureRecognizers.Add(tapGesture);
 
-                        EmotesFlexLayout.Children.Add(imageButton);
+                        EmotesFlexLayout.Children.Add(frame);
                     }
                     else
                     {
