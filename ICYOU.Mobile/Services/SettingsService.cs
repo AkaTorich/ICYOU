@@ -86,8 +86,9 @@ public class SettingsService
     public List<string> GetAvailableEmotePacks()
     {
         var packs = new List<string> { "(По умолчанию)" };
-        var emotesPath = Path.Combine(GetAppDataDirectory(), "emotes");
-        
+        // В MAUI файлы из Resources/Raw доступны через AppContext.BaseDirectory
+        var emotesPath = Path.Combine(AppContext.BaseDirectory, "emotes");
+
         if (Directory.Exists(emotesPath))
         {
             foreach (var dir in Directory.GetDirectories(emotesPath))
@@ -95,16 +96,16 @@ public class SettingsService
                 packs.Add(Path.GetFileName(dir));
             }
         }
-        
+
         return packs;
     }
-    
+
     public string? GetCurrentEmotePackPath()
     {
         if (string.IsNullOrEmpty(_settings.EmotePack) || _settings.EmotePack == "(По умолчанию)")
             return null;
-            
-        var packPath = Path.Combine(GetAppDataDirectory(), "emotes", _settings.EmotePack);
+
+        var packPath = Path.Combine(AppContext.BaseDirectory, "emotes", _settings.EmotePack);
         return Directory.Exists(packPath) ? packPath : null;
     }
 }
