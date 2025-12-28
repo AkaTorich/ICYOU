@@ -61,8 +61,9 @@ public partial class SettingsPage : ContentPage
     {
         try
         {
-            var settings = SettingsService.Instance.Settings;
-            var availablePacks = SettingsService.GetAvailableEmotePacks();
+            var settingsService = SettingsService.Instance;
+            var settings = settingsService.Settings;
+            var availablePacks = settingsService.GetAvailableEmotePacks();
 
             EmotePackPicker.ItemsSource = availablePacks;
 
@@ -97,8 +98,8 @@ public partial class SettingsPage : ContentPage
                 return;
             }
 
-            var packPath = SettingsService.GetCurrentEmotePackPath();
-            if (Directory.Exists(packPath))
+            var packPath = SettingsService.Instance.GetCurrentEmotePackPath();
+            if (!string.IsNullOrEmpty(packPath) && Directory.Exists(packPath))
             {
                 var emoteFiles = Directory.GetFiles(packPath, "*.*")
                     .Where(f => f.EndsWith(".gif") || f.EndsWith(".png") ||
@@ -110,7 +111,21 @@ public partial class SettingsPage : ContentPage
             }
             else
             {
-                EmotePackInfoLabel.Text = "Папка пака не найдена";
+                // Если packPath null - это значит выбран пак по умолчанию
+                var emotesPath = Path.Combine(FileSystem.AppDataDirectory, "emotes");
+                if (Directory.Exists(emotesPath))
+                {
+                    var emoteFiles = Directory.GetFiles(emotesPath, "*.*")
+                        .Where(f => f.EndsWith(".gif") || f.EndsWith(".png") ||
+                                   f.EndsWith(".jpg") || f.EndsWith(".jpeg") ||
+                                   f.EndsWith(".webp"))
+                        .Count();
+                    EmotePackInfoLabel.Text = $"Путь: {emotesPath}\nСмайлов: {emoteFiles}";
+                }
+                else
+                {
+                    EmotePackInfoLabel.Text = "Папка пака не найдена";
+                }
             }
         }
         catch (Exception ex)
