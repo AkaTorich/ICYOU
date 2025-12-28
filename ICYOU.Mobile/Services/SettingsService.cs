@@ -67,6 +67,10 @@ public class SettingsService
                 var json = File.ReadAllText(path);
                 _settings = JsonSerializer.Deserialize<ClientSettings>(json) ?? new ClientSettings();
             }
+            else
+            {
+                _settings = new ClientSettings();
+            }
         }
         catch
         {
