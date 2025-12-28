@@ -489,53 +489,88 @@ public partial class ChatPage : ContentPage
                 var code = kvp.Key;
                 var path = kvp.Value;
 
-                var button = new Button
-                {
-                    WidthRequest = 50,
-                    HeightRequest = 50,
-                    Padding = 0,
-                    Margin = new Thickness(5),
-                    BackgroundColor = Colors.Transparent,
-                    BorderColor = Colors.LightGray,
-                    BorderWidth = 1,
-                    CornerRadius = 8
-                };
-
                 try
                 {
                     var emoteImage = emoteService.GetEmoteImage(code);
                     if (emoteImage != null)
                     {
-                        var image = new Image
+                        // Используем ImageButton для смайлов с изображением
+                        var imageButton = new ImageButton
                         {
                             Source = emoteImage,
-                            WidthRequest = 40,
-                            HeightRequest = 40,
-                            Aspect = Aspect.AspectFit,
-                            IsAnimationPlaying = true
+                            WidthRequest = 50,
+                            HeightRequest = 50,
+                            Padding = 5,
+                            Margin = new Thickness(5),
+                            BackgroundColor = Colors.Transparent,
+                            BorderColor = Colors.LightGray,
+                            BorderWidth = 1,
+                            CornerRadius = 8,
+                            Aspect = Aspect.AspectFit
                         };
-                        button.Content = image;
+
+                        imageButton.Clicked += (s, e) =>
+                        {
+                            MessageInput.Text += code;
+                            EmotesPanel.IsVisible = false;
+                            MessageInput.Focus();
+                        };
+
+                        EmotesFlexLayout.Children.Add(imageButton);
                     }
                     else
                     {
-                        button.Text = code;
-                        button.FontSize = 10;
+                        // Используем обычный Button для текстовых кодов (если изображение не загрузилось)
+                        var button = new Button
+                        {
+                            Text = code,
+                            FontSize = 10,
+                            WidthRequest = 50,
+                            HeightRequest = 50,
+                            Padding = 0,
+                            Margin = new Thickness(5),
+                            BackgroundColor = Colors.Transparent,
+                            BorderColor = Colors.LightGray,
+                            BorderWidth = 1,
+                            CornerRadius = 8
+                        };
+
+                        button.Clicked += (s, e) =>
+                        {
+                            MessageInput.Text += code;
+                            EmotesPanel.IsVisible = false;
+                            MessageInput.Focus();
+                        };
+
+                        EmotesFlexLayout.Children.Add(button);
                     }
                 }
                 catch
                 {
-                    button.Text = code;
-                    button.FontSize = 10;
+                    // В случае ошибки используем текстовый Button
+                    var button = new Button
+                    {
+                        Text = code,
+                        FontSize = 10,
+                        WidthRequest = 50,
+                        HeightRequest = 50,
+                        Padding = 0,
+                        Margin = new Thickness(5),
+                        BackgroundColor = Colors.Transparent,
+                        BorderColor = Colors.LightGray,
+                        BorderWidth = 1,
+                        CornerRadius = 8
+                    };
+
+                    button.Clicked += (s, e) =>
+                    {
+                        MessageInput.Text += code;
+                        EmotesPanel.IsVisible = false;
+                        MessageInput.Focus();
+                    };
+
+                    EmotesFlexLayout.Children.Add(button);
                 }
-
-                button.Clicked += (s, e) =>
-                {
-                    MessageInput.Text += code;
-                    EmotesPanel.IsVisible = false;
-                    MessageInput.Focus();
-                };
-
-                EmotesFlexLayout.Children.Add(button);
             }
 
             DebugLog.Write($"[ChatPage] Loaded {emotes.Count} emotes to panel");
