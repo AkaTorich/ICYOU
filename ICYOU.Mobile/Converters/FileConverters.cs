@@ -5,7 +5,7 @@ namespace ICYOU.Mobile.Converters;
 
 public class FileTypeToIconConverter : IMultiValueConverter
 {
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object?[]? values, Type? targetType, object? parameter, CultureInfo? culture)
     {
         if (values == null || values.Length == 0 || values[0] is not string fileType)
             return "📄";
@@ -19,7 +19,7 @@ public class FileTypeToIconConverter : IMultiValueConverter
         };
     }
 
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    public object?[]? ConvertBack(object? value, Type?[]? targetTypes, object? parameter, CultureInfo? culture)
     {
         throw new NotImplementedException();
     }
@@ -27,7 +27,7 @@ public class FileTypeToIconConverter : IMultiValueConverter
 
 public class FileTypeToTextConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type? targetType, object? parameter, CultureInfo? culture)
     {
         if (value is not string fileType)
             return "Файл";
@@ -41,7 +41,7 @@ public class FileTypeToTextConverter : IValueConverter
         };
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type? targetType, object? parameter, CultureInfo? culture)
     {
         throw new NotImplementedException();
     }

@@ -48,14 +48,14 @@ public class FileTransferService
         }
 
         var fileInfo = new FileInfo(filePath);
-        TcpClient? client = null;
+        System.Net.Sockets.TcpClient? client = null;
         NetworkStream? stream = null;
 
         try
         {
             DebugLog.Write($"[FileTransferService] Начало загрузки {fileInfo.Name} ({fileInfo.Length} байт)");
 
-            client = new TcpClient();
+            client = new System.Net.Sockets.TcpClient();
             client.SendTimeout = 120000;
             client.ReceiveTimeout = 120000;
 
@@ -140,14 +140,14 @@ public class FileTransferService
             return (null, null);
         }
 
-        TcpClient? client = null;
+        System.Net.Sockets.TcpClient? client = null;
         NetworkStream? stream = null;
 
         try
         {
             DebugLog.Write($"[FileTransferService] Начало скачивания файла {fileId}");
 
-            client = new TcpClient();
+            client = new System.Net.Sockets.TcpClient();
             client.ReceiveTimeout = 120000;
 
             await client.ConnectAsync(_serverHost, _filePort);

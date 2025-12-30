@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd: Implement file transfer functionality for mobile version\n\n- Implement FileTransferService.UploadFileAsync and DownloadFileAsync\n- Add file parsing and storage for Android/iOS in AppDataDirectory\n- Add file send/receive handlers in ChatPage and ChatsListPage\n- Add file message parsing in MessageViewModel\n- Create UI components for displaying images, videos, and other files\n- Add file type converters \\(FileTypeToIconConverter, FileTypeToTextConverter\\)\n- Add permissions for Android \\(AndroidManifest\\) and iOS \\(Info.plist\\)\n- Support all file types: images \\(inline preview\\), video, audio, documents\n- Clean up old server files \\(moved to ICYOU.Server.Linux\\)\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

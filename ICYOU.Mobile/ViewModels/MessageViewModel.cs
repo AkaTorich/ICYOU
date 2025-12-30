@@ -241,9 +241,10 @@ public class MessageViewModel : INotifyPropertyChanged
                     FilePath = savedPath ?? "";
 
                     // Если это изображение, создаем ImageSource
-                    if (IsImage && fileData != null)
+                    if (IsImage && fileData != null && fileData.Length > 0)
                     {
-                        FileImageSource = ImageSource.FromStream(() => new MemoryStream(fileData));
+                        var data = fileData; // Локальная копия для замыкания
+                        FileImageSource = ImageSource.FromStream(() => new MemoryStream(data));
                     }
 
                     DebugLog.Write($"[MessageViewModel] File parsed: {FileName}, Type: {FileType}, Size: {fileData?.Length ?? 0} bytes");
