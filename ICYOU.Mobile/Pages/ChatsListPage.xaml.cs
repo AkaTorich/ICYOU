@@ -182,6 +182,12 @@ public partial class ChatsListPage : ContentPage
                     RebuildList();
                     break;
 
+                case PacketType.FileAvailable:
+                    // Обновляем список чатов при новом файле (как и для обычных сообщений)
+                    await LoadChats();
+                    RebuildList();
+                    break;
+
                 case PacketType.UserStatusChanged:
                     // Обновляем статус конкретного пользователя (оптимизированно, как в Desktop)
                     var statusData = packet.GetData<UserStatusChangedData>();

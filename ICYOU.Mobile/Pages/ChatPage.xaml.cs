@@ -423,15 +423,132 @@ public partial class ChatPage : ContentPage
     {
         try
         {
-            var result = await FilePicker.PickAsync();
-            if (result != null)
+            // Проверяем, что есть чат или друг
+            if (_chatId == 0 && _chatViewModel?.Friend == null)
             {
-                ShowStatus("Отправка файлов пока не поддерживается", false);
+                ShowStatus("Сначала выберите чат или друга", false);
+                return;
             }
+
+            var result = await FilePicker.PickAsync(new PickOptions
+            {
+                PickerTitle = "Выберите файл",
+                FileTypes = FilePickerFileType.All
+            });
+
+            if (result == null)
+                return;
+
+            // Копируем файл во временную папку для получения размера
+            var cacheDir = FileSystem.CacheDirectory;
+            var tempFilePath = Path.Combine(cacheDir, result.FileName);
+
+            using (var stream = await result.OpenReadAsync())
+            using (var fileStream = File.Create(tempFilePath))
+            {
+                await stream.CopyToAsync(fileStream);
+            }
+
+            var fileInfo = new FileInfo(tempFilePath);
+
+            // Ограничение 1GB
+            if (fileInfo.Length > 1024L * 1024 * 1024)
+            {
+                ShowStatus("Файл слишком большой. Максимум 1 ГБ", false);
+                File.Delete(tempFilePath);
+                return;
+            }
+
+            DebugLog.Write($"[ChatPage] Отправка файла: {fileInfo.Name} ({fileInfo.Length} байт)");
+
+            // Если чата еще нет, создаем его
+            if (_chatId == 0 && _chatViewModel?.Friend != null)
+            {
+                var createResponse = await AppState.NetworkClient.SendAndWaitAsync(new Packet(PacketType.CreateChat, new CreateChatData
+                {
+                    Name = _chatViewModel.Friend.DisplayName,
+                    MemberIds = new List<long> { _chatViewModel.Friend.Id }
+                }));
+
+                if (createResponse?.Type == PacketType.CreateChatResponse)
+                {
+                    var chat = createResponse.GetData<Chat>();
+                    if (chat != null)
+                    {
+                        _chatId = chat.Id;
+                    }
+                }
+            }
+
+            if (_chatId == 0)
+            {
+                ShowStatus("Не удалось создать чат", false);
+                File.Delete(tempFilePath);
+                return;
+            }
+
+            long targetUserId = 0;
+            if (_chatViewModel?.Friend != null)
+            {
+                targetUserId = _chatViewModel.Friend.Id;
+            }
+
+            // Показываем прогресс
+            ShowStatus("Отправка файла...", true);
+
+            var fileService = FileTransferService.Instance;
+            var success = await fileService.UploadFileAsync(tempFilePath, targetUserId, _chatId);
+
+            if (success)
+            {
+                // Создаем сообщение с файлом
+                var fileType = fileService.GetFileType(fileInfo.Name);
+                var fileData = await File.ReadAllBytesAsync(tempFilePath);
+                var base64 = Convert.ToBase64String(fileData);
+
+                // Сохраняем копию в AppData для отправителя
+                var savedPath = fileService.SaveToAppData(fileInfo.Name, fileData);
+
+                // Формат: [FILE|имя|тип|путь|base64]
+                var content = $"[FILE|{fileInfo.Name}|{fileType}|{savedPath}|{base64}]";
+
+                var message = new Message
+                {
+                    Id = DateTime.UtcNow.Ticks,
+                    ChatId = _chatId,
+                    SenderId = AppState.CurrentUser.Id,
+                    SenderName = AppState.CurrentUser.DisplayName,
+                    Content = content,
+                    Type = fileType == "image" ? MessageType.Image : MessageType.File,
+                    Timestamp = DateTime.UtcNow,
+                    Status = MessageStatus.Sent
+                };
+
+                // Добавляем в UI
+                var viewModel = new MessageViewModel(message);
+                _messages.Add(viewModel);
+                MessagesList.ScrollTo(viewModel, position: ScrollToPosition.End, animate: true);
+
+                // Сохраняем в БД
+                LocalDatabaseService.Instance.SaveMessage(message);
+
+                ShowStatus("Файл отправлен успешно", true);
+                DebugLog.Write($"[ChatPage] Файл {fileInfo.Name} отправлен успешно");
+            }
+            else
+            {
+                var error = fileService.LastError ?? "Неизвестная ошибка";
+                ShowStatus($"Не удалось отправить файл: {error}", false);
+                DebugLog.Write($"[ChatPage] Ошибка отправки файла: {error}");
+            }
+
+            // Удаляем временный файл
+            File.Delete(tempFilePath);
         }
         catch (Exception ex)
         {
-            ShowStatus($"Ошибка выбора файла: {ex.Message}", false);
+            ShowStatus($"Ошибка отправки файла: {ex.Message}", false);
+            DebugLog.Write($"[ChatPage] OnAttachFileClicked error: {ex}");
         }
     }
 
@@ -640,8 +757,93 @@ public partial class ChatPage : ContentPage
                         }
                     }
                     break;
+
+                case PacketType.FileAvailable:
+                    HandleFileAvailable(packet);
+                    break;
             }
         });
+    }
+
+    private async void HandleFileAvailable(Packet packet)
+    {
+        var data = packet.GetData<FileNotificationData>();
+        if (data == null)
+        {
+            DebugLog.Write("[ChatPage] FileAvailable: data is null");
+            return;
+        }
+
+        // Проверяем, что файл для текущего чата
+        if (data.ChatId != _chatId)
+        {
+            DebugLog.Write($"[ChatPage] FileAvailable: не наш чат (data.ChatId={data.ChatId}, _chatId={_chatId})");
+            return;
+        }
+
+        DebugLog.Write($"[ChatPage] Получен файл: {data.FileName} от {data.SenderName}");
+
+        try
+        {
+            ShowStatus("Скачивание файла...", true);
+
+            // Скачиваем файл с сервера
+            var fileService = FileTransferService.Instance;
+            var (fileName, fileData) = await fileService.DownloadFileAsync(data.FileId);
+
+            if (fileData == null || fileName == null)
+            {
+                ShowStatus("Не удалось скачать файл", false);
+                DebugLog.Write("[ChatPage] Не удалось скачать файл");
+                return;
+            }
+
+            // Сохраняем файл в AppData
+            var savedPath = fileService.SaveToAppData(fileName, fileData);
+
+            // Сохраняем информацию о файле в локальную БД
+            LocalDatabaseService.Instance.SaveFile(
+                data.FileId,
+                0, // messageId будет позже
+                data.ChatId,
+                fileName,
+                data.FileType,
+                savedPath,
+                data.FileSize);
+
+            // Создаем сообщение с файлом
+            var base64 = Convert.ToBase64String(fileData);
+            var content = $"[FILE|{fileName}|{data.FileType}|{savedPath}|{base64}]";
+            var msgType = data.FileType == "image" ? MessageType.Image : MessageType.File;
+
+            var message = new Message
+            {
+                Id = DateTime.UtcNow.Ticks,
+                ChatId = data.ChatId,
+                SenderId = data.SenderId,
+                SenderName = data.SenderName,
+                Content = content,
+                Type = msgType,
+                Timestamp = DateTime.UtcNow,
+                Status = MessageStatus.Sent
+            };
+
+            // Сохраняем в БД
+            LocalDatabaseService.Instance.SaveMessage(message);
+
+            // Добавляем в UI
+            var viewModel = new MessageViewModel(message);
+            _messages.Add(viewModel);
+            MessagesList.ScrollTo(viewModel, position: ScrollToPosition.End, animate: true);
+
+            ShowStatus($"Файл {fileName} получен", true);
+            DebugLog.Write($"[ChatPage] Файл {fileName} получен и сохранен успешно");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Ошибка получения файла: {ex.Message}", false);
+            DebugLog.Write($"[ChatPage] HandleFileAvailable error: {ex}");
+        }
     }
 
     protected override void OnDisappearing()
@@ -652,6 +854,70 @@ public partial class ChatPage : ContentPage
         if (AppState.NetworkClient != null)
         {
             AppState.NetworkClient.PacketReceived -= OnPacketReceived;
+        }
+    }
+
+    private async void OnFileImageTapped(object sender, EventArgs e)
+    {
+        try
+        {
+            if (sender is Image image && image.BindingContext is MessageViewModel viewModel)
+            {
+                await OpenFile(viewModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] OnFileImageTapped error: {ex}");
+            ShowStatus($"Ошибка открытия изображения: {ex.Message}", false);
+        }
+    }
+
+    private async void OnFileFrameTapped(object sender, EventArgs e)
+    {
+        try
+        {
+            if (sender is Frame frame && frame.BindingContext is MessageViewModel viewModel)
+            {
+                await OpenFile(viewModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] OnFileFrameTapped error: {ex}");
+            ShowStatus($"Ошибка открытия файла: {ex.Message}", false);
+        }
+    }
+
+    private async Task OpenFile(MessageViewModel viewModel)
+    {
+        try
+        {
+            if (!viewModel.HasFile || string.IsNullOrEmpty(viewModel.FilePath))
+            {
+                ShowStatus("Файл не найден", false);
+                return;
+            }
+
+            if (!File.Exists(viewModel.FilePath))
+            {
+                ShowStatus("Файл не найден на устройстве", false);
+                DebugLog.Write($"[ChatPage] File not found: {viewModel.FilePath}");
+                return;
+            }
+
+            DebugLog.Write($"[ChatPage] Opening file: {viewModel.FilePath}");
+
+            // Используем Launcher для открытия файла
+            await Launcher.OpenAsync(new OpenFileRequest
+            {
+                File = new ReadOnlyFile(viewModel.FilePath)
+            });
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] OpenFile error: {ex}");
+            ShowStatus($"Не удалось открыть файл: {ex.Message}", false);
         }
     }
 

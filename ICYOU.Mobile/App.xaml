@@ -13,6 +13,8 @@
 
             <!-- Value Converters -->
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <converters:FileTypeToIconConverter x:Key="FileTypeToIconConverter" />
+            <converters:FileTypeToTextConverter x:Key="FileTypeToTextConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

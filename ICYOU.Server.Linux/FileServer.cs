@@ -311,3 +311,4 @@ public class FileDownloadedEventArgs : EventArgs
 {
     public string FileId { get; set; } = "";
 }
+

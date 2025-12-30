@@ -51,8 +51,20 @@ public class MessageViewModel : INotifyPropertyChanged
     public string LinkPreviewSiteName { get; } = "";
     public string TextBeforePreview { get; } = "";
 
+    // Свойства для файлов
+    public bool HasFile { get; }
+    public string FileName { get; } = "";
+    public string FileType { get; } = "";
+    public byte[]? FileData { get; }
+    public string FilePath { get; } = "";
+    public bool IsImage => FileType == "image";
+    public bool IsVideo => FileType == "video";
+    public bool IsAudio => FileType == "audio";
+    public bool IsOtherFile => !IsImage && !IsVideo && !IsAudio && HasFile;
+    public ImageSource? FileImageSource { get; }
+
     // Вспомогательные свойства
-    public bool ShowFullContent => !HasQuote && !HasLinkPreview;
+    public bool ShowFullContent => !HasQuote && !HasLinkPreview && !HasFile;
     public bool HasLinkPreviewImage => !string.IsNullOrEmpty(LinkPreviewImageUrl);
     public bool HasLinkPreviewDescription => !string.IsNullOrEmpty(LinkPreviewDescription);
     public bool HasTextBeforePreview => !string.IsNullOrEmpty(TextBeforePreview);
@@ -212,8 +224,40 @@ public class MessageViewModel : INotifyPropertyChanged
             }
         }
 
-        // Проверяем формат [LINKPREVIEW|...] (только если нет цитаты, т.к. превью в цитате уже обработано выше)
-        if (!HasQuote && content.Contains("[LINKPREVIEW|"))
+        // Проверяем формат [FILE|...] (только если нет цитаты)
+        if (!HasQuote && (content.StartsWith("[FILE|") || content.StartsWith("[FILE:")))
+        {
+            try
+            {
+                var fileService = FileTransferService.Instance;
+                var (fileType, fileName, fileData, savedPath) = fileService.ParseFileMessage(content);
+
+                if (!string.IsNullOrEmpty(fileType) && !string.IsNullOrEmpty(fileName))
+                {
+                    HasFile = true;
+                    FileName = fileName;
+                    FileType = fileType;
+                    FileData = fileData;
+                    FilePath = savedPath ?? "";
+
+                    // Если это изображение, создаем ImageSource
+                    if (IsImage && fileData != null)
+                    {
+                        FileImageSource = ImageSource.FromStream(() => new MemoryStream(fileData));
+                    }
+
+                    DebugLog.Write($"[MessageViewModel] File parsed: {FileName}, Type: {FileType}, Size: {fileData?.Length ?? 0} bytes");
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog.Write($"[MessageViewModel] Error parsing file: {ex.Message}");
+                HasFile = false;
+            }
+        }
+
+        // Проверяем формат [LINKPREVIEW|...] (только если нет цитаты и файла, т.к. превью в цитате уже обработано выше)
+        if (!HasQuote && !HasFile && content.Contains("[LINKPREVIEW|"))
         {
             try
             {

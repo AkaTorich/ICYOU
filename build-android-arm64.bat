@@ -132,7 +132,7 @@ if exist "%APK_PATH%" (
 
     REM Копирование APK в папку build
     if not exist "build" mkdir build
-    copy /Y "%APK_PATH%" "build\ICYOU.Mobile-arm64.apk" >nul
+    copy /Y "%APK_PATH%" "build\ICYOU.Mobile-arm64.apk"
     echo APK скопирован в: %CD%\build\ICYOU.Mobile-arm64.apk
     echo.
 ) else (
