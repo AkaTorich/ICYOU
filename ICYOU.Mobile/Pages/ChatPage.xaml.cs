@@ -948,20 +948,22 @@ public partial class ChatPage : ContentPage
 
             DebugLog.Write($"[ChatPage] Saving file: {viewModel.FileName}");
 
-            // Создаём временный файл для sharing
+#if ANDROID
+            // Android - сохраняем напрямую в Downloads или Pictures
+            await SaveFileAndroid(viewModel);
+#elif IOS
+            // iOS - сохраняем в Photos или Files
+            await SaveFileIOS(viewModel);
+#else
+            // Fallback для других платформ
             var tempPath = Path.Combine(FileSystem.CacheDirectory, viewModel.FileName);
             await File.WriteAllBytesAsync(tempPath, viewModel.FileData);
-
-            // Используем Share API для сохранения файла
-            // На Android/iOS откроется диалог выбора приложения для сохранения
             await Share.RequestAsync(new ShareFileRequest
             {
-                Title = viewModel.IsImage ? "Сохранить изображение" : "Сохранить файл",
+                Title = "Сохранить файл",
                 File = new ShareFile(tempPath)
             });
-
-            ShowStatus("Выберите приложение для сохранения файла", true);
-            DebugLog.Write($"[ChatPage] File prepared for saving: {viewModel.FileName}");
+#endif
         }
         catch (PermissionException pex)
         {
@@ -974,6 +976,132 @@ public partial class ChatPage : ContentPage
             ShowStatus($"Не удалось сохранить файл: {ex.Message}", false);
         }
     }
+
+#if ANDROID
+    private async Task SaveFileAndroid(MessageViewModel viewModel)
+    {
+        var context = Android.App.Application.Context;
+
+        if (viewModel.IsImage)
+        {
+            // Сохраняем изображение в галерею
+            var contentValues = new Android.Content.ContentValues();
+            contentValues.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, viewModel.FileName);
+            contentValues.Put(Android.Provider.MediaStore.IMediaColumns.MimeType, GetMimeType(viewModel.FileName));
+            contentValues.Put(Android.Provider.MediaStore.IMediaColumns.RelativePath, Android.OS.Environment.DirectoryPictures + "/ICYOU");
+
+            var resolver = context.ContentResolver;
+            var imageUri = resolver?.Insert(Android.Provider.MediaStore.Images.Media.ExternalContentUri!, contentValues);
+
+            if (imageUri != null && resolver != null)
+            {
+                using var outputStream = resolver.OpenOutputStream(imageUri);
+                if (outputStream != null)
+                {
+                    await outputStream.WriteAsync(viewModel.FileData, 0, viewModel.FileData.Length);
+                    ShowStatus($"Изображение сохранено в галерею", true);
+                    DebugLog.Write($"[ChatPage] Image saved to gallery: {viewModel.FileName}");
+                }
+            }
+        }
+        else
+        {
+            // Сохраняем файл в Downloads
+            var contentValues = new Android.Content.ContentValues();
+            contentValues.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, viewModel.FileName);
+            contentValues.Put(Android.Provider.MediaStore.IMediaColumns.MimeType, GetMimeType(viewModel.FileName));
+            contentValues.Put(Android.Provider.MediaStore.IMediaColumns.RelativePath, Android.OS.Environment.DirectoryDownloads + "/ICYOU");
+
+            var resolver = context.ContentResolver;
+            var fileUri = resolver?.Insert(Android.Provider.MediaStore.Downloads.ExternalContentUri!, contentValues);
+
+            if (fileUri != null && resolver != null)
+            {
+                using var outputStream = resolver.OpenOutputStream(fileUri);
+                if (outputStream != null)
+                {
+                    await outputStream.WriteAsync(viewModel.FileData, 0, viewModel.FileData.Length);
+                    ShowStatus($"Файл сохранён в Downloads/ICYOU", true);
+                    DebugLog.Write($"[ChatPage] File saved to downloads: {viewModel.FileName}");
+                }
+            }
+        }
+    }
+
+    private string GetMimeType(string fileName)
+    {
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        return extension switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            ".mp4" => "video/mp4",
+            ".webm" => "video/webm",
+            ".avi" => "video/avi",
+            ".mkv" => "video/x-matroska",
+            ".mov" => "video/quicktime",
+            ".mp3" => "audio/mpeg",
+            ".wav" => "audio/wav",
+            ".ogg" => "audio/ogg",
+            ".flac" => "audio/flac",
+            ".pdf" => "application/pdf",
+            ".txt" => "text/plain",
+            ".zip" => "application/zip",
+            _ => "application/octet-stream"
+        };
+    }
+#endif
+
+#if IOS
+    private async Task SaveFileIOS(MessageViewModel viewModel)
+    {
+        if (viewModel.IsImage)
+        {
+            // Сохраняем изображение в Photos
+            var image = UIKit.UIImage.LoadFromData(Foundation.NSData.FromArray(viewModel.FileData));
+            if (image != null)
+            {
+                image.SaveToPhotosAlbum((img, error) =>
+                {
+                    if (error == null)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            ShowStatus("Изображение сохранено в галерею", true);
+                            DebugLog.Write($"[ChatPage] Image saved to photos: {viewModel.FileName}");
+                        });
+                    }
+                    else
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            ShowStatus($"Ошибка сохранения: {error.LocalizedDescription}", false);
+                        });
+                    }
+                });
+            }
+        }
+        else
+        {
+            // Для других файлов используем UIDocumentPickerViewController
+            var tempPath = Path.Combine(FileSystem.CacheDirectory, viewModel.FileName);
+            await File.WriteAllBytesAsync(tempPath, viewModel.FileData);
+
+            var url = Foundation.NSUrl.FromFilename(tempPath);
+            var documentPicker = new UIKit.UIDocumentPickerViewController(new[] { url }, UIKit.UIDocumentPickerMode.ExportToService);
+
+            var viewController = Platform.GetCurrentUIViewController();
+            if (viewController != null)
+            {
+                await viewController.PresentViewControllerAsync(documentPicker, true);
+                ShowStatus("Выберите место для сохранения файла", true);
+            }
+        }
+    }
+#endif
 
     private void ShowStatus(string message, bool isSuccess)
     {
