@@ -67,7 +67,7 @@ public class FileTransferService
             using (var bw = new BinaryWriter(headerMs, System.Text.Encoding.UTF8, leaveOpen: true))
             {
                 bw.Write((byte)1);                          // команда upload
-                bw.Write(App.CurrentUser!.Id);              // senderId
+                bw.Write(AppState.CurrentUser!.Id);         // senderId
                 bw.Write(targetUserId);                     // targetUserId
                 bw.Write(chatId);                           // chatId
 

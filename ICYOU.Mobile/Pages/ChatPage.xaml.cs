@@ -432,8 +432,7 @@ public partial class ChatPage : ContentPage
 
             var result = await FilePicker.PickAsync(new PickOptions
             {
-                PickerTitle = "Выберите файл",
-                FileTypes = FilePickerFileType.All
+                PickerTitle = "Выберите файл"
             });
 
             if (result == null)
