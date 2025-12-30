@@ -920,6 +920,61 @@ public partial class ChatPage : ContentPage
         }
     }
 
+    private async void OnSaveFileTapped(object sender, EventArgs e)
+    {
+        try
+        {
+            if (sender is Button button && button.CommandParameter is MessageViewModel viewModel)
+            {
+                await SaveFile(viewModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] OnSaveFileTapped error: {ex}");
+            ShowStatus($"Ошибка сохранения файла: {ex.Message}", false);
+        }
+    }
+
+    private async Task SaveFile(MessageViewModel viewModel)
+    {
+        try
+        {
+            if (!viewModel.HasFile || viewModel.FileData == null || viewModel.FileData.Length == 0)
+            {
+                ShowStatus("Нет данных файла для сохранения", false);
+                return;
+            }
+
+            DebugLog.Write($"[ChatPage] Saving file: {viewModel.FileName}");
+
+            // Создаём временный файл для sharing
+            var tempPath = Path.Combine(FileSystem.CacheDirectory, viewModel.FileName);
+            await File.WriteAllBytesAsync(tempPath, viewModel.FileData);
+
+            // Используем Share API для сохранения файла
+            // На Android/iOS откроется диалог выбора приложения для сохранения
+            await Share.RequestAsync(new ShareFileRequest
+            {
+                Title = viewModel.IsImage ? "Сохранить изображение" : "Сохранить файл",
+                File = new ShareFile(tempPath)
+            });
+
+            ShowStatus("Выберите приложение для сохранения файла", true);
+            DebugLog.Write($"[ChatPage] File prepared for saving: {viewModel.FileName}");
+        }
+        catch (PermissionException pex)
+        {
+            DebugLog.Write($"[ChatPage] Permission error: {pex.Message}");
+            ShowStatus("Нет разрешения на сохранение файлов. Проверьте настройки приложения", false);
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"[ChatPage] SaveFile error: {ex}");
+            ShowStatus($"Не удалось сохранить файл: {ex.Message}", false);
+        }
+    }
+
     private void ShowStatus(string message, bool isSuccess)
     {
         StatusText.Text = message;

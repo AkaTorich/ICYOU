@@ -138,54 +138,77 @@
                                 <!-- File Content (если есть файл) -->
                                 <VerticalStackLayout IsVisible="{Binding HasFile}" Spacing="6">
                                     <!-- Image File -->
-                                    <Image Source="{Binding FileImageSource}"
-                                           Aspect="AspectFit"
-                                           MaximumHeightRequest="200"
-                                           IsVisible="{Binding IsImage}">
-                                        <Image.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="OnFileImageTapped" CommandParameter="{Binding .}" />
-                                        </Image.GestureRecognizers>
-                                    </Image>
+                                    <VerticalStackLayout IsVisible="{Binding IsImage}" Spacing="8">
+                                        <Image Source="{Binding FileImageSource}"
+                                               Aspect="AspectFit"
+                                               MaximumHeightRequest="200">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnFileImageTapped" CommandParameter="{Binding .}" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
+                                        <!-- Save Button for Images -->
+                                        <Button Text="💾 Сохранить в галерею"
+                                                Clicked="OnSaveFileTapped"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="#4CAF50"
+                                                TextColor="White"
+                                                FontSize="13"
+                                                Padding="12,8"
+                                                CornerRadius="6"
+                                                HorizontalOptions="Start" />
+                                    </VerticalStackLayout>
 
                                     <!-- Video/Audio/Other Files -->
-                                    <Frame BackgroundColor="#F5F5F5"
-                                           Padding="12"
-                                           CornerRadius="8"
-                                           HasShadow="False"
-                                           IsVisible="{Binding IsImage, Converter={StaticResource InvertedBoolConverter}}">
-                                        <Frame.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="OnFileFrameTapped" CommandParameter="{Binding .}" />
-                                        </Frame.GestureRecognizers>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                            <!-- File Icon -->
-                                            <Label Grid.Column="0"
-                                                   FontSize="32"
-                                                   VerticalOptions="Center">
-                                                <Label.Text>
-                                                    <MultiBinding Converter="{StaticResource FileTypeToIconConverter}">
-                                                        <Binding Path="FileType" />
-                                                    </MultiBinding>
-                                                </Label.Text>
-                                            </Label>
-
-                                            <!-- File Info -->
-                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                                <Label Text="{Binding FileName}"
-                                                       FontSize="14"
-                                                       FontAttributes="Bold"
-                                                       LineBreakMode="TailTruncation"
-                                                       MaxLines="2" />
-                                                <Label FontSize="12"
-                                                       TextColor="Gray">
+                                    <VerticalStackLayout IsVisible="{Binding IsImage, Converter={StaticResource InvertedBoolConverter}}" Spacing="8">
+                                        <Frame BackgroundColor="#F5F5F5"
+                                               Padding="12"
+                                               CornerRadius="8"
+                                               HasShadow="False">
+                                            <Frame.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnFileFrameTapped" CommandParameter="{Binding .}" />
+                                            </Frame.GestureRecognizers>
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                                <!-- File Icon -->
+                                                <Label Grid.Column="0"
+                                                       FontSize="32"
+                                                       VerticalOptions="Center">
                                                     <Label.Text>
-                                                        <MultiBinding StringFormat="{}{0} • Нажмите для открытия">
-                                                            <Binding Path="FileType" Converter="{StaticResource FileTypeToTextConverter}" />
+                                                        <MultiBinding Converter="{StaticResource FileTypeToIconConverter}">
+                                                            <Binding Path="FileType" />
                                                         </MultiBinding>
                                                     </Label.Text>
                                                 </Label>
-                                            </VerticalStackLayout>
-                                        </Grid>
-                                    </Frame>
+
+                                                <!-- File Info -->
+                                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                    <Label Text="{Binding FileName}"
+                                                           FontSize="14"
+                                                           FontAttributes="Bold"
+                                                           LineBreakMode="TailTruncation"
+                                                           MaxLines="2" />
+                                                    <Label FontSize="12"
+                                                           TextColor="Gray">
+                                                        <Label.Text>
+                                                            <MultiBinding StringFormat="{}{0} • Нажмите для открытия">
+                                                                <Binding Path="FileType" Converter="{StaticResource FileTypeToTextConverter}" />
+                                                            </MultiBinding>
+                                                        </Label.Text>
+                                                    </Label>
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Frame>
+
+                                        <!-- Save Button -->
+                                        <Button Text="💾 Сохранить в галерею"
+                                                Clicked="OnSaveFileTapped"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="#4CAF50"
+                                                TextColor="White"
+                                                FontSize="13"
+                                                Padding="12,8"
+                                                CornerRadius="6"
+                                                HorizontalOptions="Start" />
+                                    </VerticalStackLayout>
                                 </VerticalStackLayout>
 
                                 <!-- Message Content -->
