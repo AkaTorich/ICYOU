@@ -289,3 +289,6 @@ AkaTorich - main developer, creator
 - Author email mailto:aiwan@yandex.ru
 - Author website https://kolobok.us
 
+## Донаты
+- Донаты на поддержку моей семьи можно отправлять по этой ссылке:
+- https://paypal.me/psyshout
