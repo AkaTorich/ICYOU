@@ -1,0 +1,62 @@
+name: Build Desktop
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+      
+    - name: Restore dependencies
+      run: dotnet restore ICYOU.Desktop/ICYOU.sln
+      shell: cmd
+      
+    - name: Build Solution (Release)
+      run: dotnet build ICYOU.Desktop/ICYOU.sln -c Release --no-restore
+      shell: cmd
+      
+    - name: Publish Client
+      run: dotnet publish ICYOU.Desktop/ICYOU.Client/ICYOU.Client.csproj -c Release -o build/Client --no-build
+      shell: cmd
+      
+    - name: Publish Server
+      run: dotnet publish ICYOU.Desktop/ICYOU.Server/ICYOU.Server.csproj -c Release -o build/Server --no-build
+      shell: cmd
+      
+    - name: List Build output
+      run: |
+        echo === Client ===
+        dir build\Client
+        echo === Server ===
+        dir build\Server
+      shell: cmd
+      
+    - name: Upload Client Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ICYOU-Client
+        path: build/Client/
+        if-no-files-found: error
+        
+    - name: Upload Server Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ICYOU-Server
+        path: build/Server/
+        if-no-files-found: error

@@ -1,0 +1,171 @@
+name: Build Android
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+env:
+  DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build-x64:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+      
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: '17'
+      
+    - name: Install MAUI workload
+      run: |
+        dotnet workload install android --source https://api.nuget.org/v3/index.json
+        dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
+      shell: cmd
+      
+    - name: Restore ICYOU.SDK
+      run: dotnet restore ICYOU.SDK/ICYOU.SDK.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Restore ICYOU.Core
+      run: dotnet restore ICYOU.Core/ICYOU.Core.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Restore Modules
+      run: |
+        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Restore ICYOU.Mobile
+      run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Build ICYOU.SDK
+      run: dotnet build ICYOU.SDK/ICYOU.SDK.csproj -c Release -f net9.0-android
+      shell: cmd
+      
+    - name: Build ICYOU.Core
+      run: dotnet build ICYOU.Core/ICYOU.Core.csproj -c Release -f net9.0-android
+      shell: cmd
+      
+    - name: Build Modules
+      run: |
+        dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.csproj -c Release -f net9.0-android
+        dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.csproj -c Release -f net9.0-android
+        dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.csproj -c Release -f net9.0-android
+      shell: cmd
+      
+    - name: Publish Android App (x64)
+      run: dotnet publish ICYOU.Mobile/ICYOU.Mobile.csproj -c Release -f net9.0-android -r android-x64
+      shell: cmd
+      
+    - name: Copy APK
+      run: |
+        mkdir build
+        for /r ICYOU.Mobile\bin\Release\net9.0-android\android-x64\publish %%f in (*.apk) do copy "%%f" build\ICYOU-x64.apk
+      shell: cmd
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: ICYOU-Android-x64
+        path: build/*.apk
+        if-no-files-found: warn
+
+  build-arm64:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+      
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: '17'
+      
+    - name: Install MAUI workload
+      run: |
+        dotnet workload install android --source https://api.nuget.org/v3/index.json
+        dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
+      shell: cmd
+      
+    - name: Restore ICYOU.SDK
+      run: dotnet restore ICYOU.SDK/ICYOU.SDK.arm64.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Restore ICYOU.Core
+      run: dotnet restore ICYOU.Core/ICYOU.Core.arm64.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Restore Modules
+      run: |
+        dotnet restore ICYOU.Modules.E2E/ICYOU.Modules.E2E.arm64.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.Quote/ICYOU.Modules.Quote.arm64.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+        dotnet restore ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.arm64.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Restore ICYOU.Mobile
+      run: dotnet restore ICYOU.Mobile/ICYOU.Mobile.ARM64.csproj /p:TreatWarningsAsErrors=false /p:WarningLevel=0
+      shell: cmd
+      
+    - name: Build ICYOU.SDK
+      run: dotnet build ICYOU.SDK/ICYOU.SDK.arm64.csproj -c Release -f net9.0-android -r android-arm64
+      shell: cmd
+      
+    - name: Build ICYOU.Core
+      run: dotnet build ICYOU.Core/ICYOU.Core.arm64.csproj -c Release -f net9.0-android -r android-arm64
+      shell: cmd
+      
+    - name: Build Modules
+      run: |
+        dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.arm64.csproj -c Release -f net9.0-android -r android-arm64
+        dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.arm64.csproj -c Release -f net9.0-android -r android-arm64
+        dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.arm64.csproj -c Release -f net9.0-android -r android-arm64
+      shell: cmd
+      
+    - name: Publish Android App (ARM64)
+      run: dotnet publish ICYOU.Mobile/ICYOU.Mobile.ARM64.csproj -c Release -f net9.0-android -r android-arm64
+      shell: cmd
+      
+    - name: Copy APK
+      run: |
+        mkdir build
+        for /r ICYOU.Mobile\bin\Release\net9.0-android\android-arm64\publish %%f in (*.apk) do copy "%%f" build\ICYOU-arm64.apk
+      shell: cmd
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: ICYOU-Android-arm64
+        path: build/*.apk
+        if-no-files-found: warn
