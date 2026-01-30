@@ -76,22 +76,22 @@ jobs:
       shell: cmd
       
     - name: Build ICYOU.SDK
-      run: dotnet build ICYOU.SDK/ICYOU.SDK.csproj -c Release -f net9.0-android
+      run: dotnet build ICYOU.SDK/ICYOU.SDK.csproj -c Release -f net9.0-android /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Build ICYOU.Core
-      run: dotnet build ICYOU.Core/ICYOU.Core.csproj -c Release -f net9.0-android
+      run: dotnet build ICYOU.Core/ICYOU.Core.csproj -c Release -f net9.0-android /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Build Modules
       run: |
-        dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.csproj -c Release -f net9.0-android
-        dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.csproj -c Release -f net9.0-android
-        dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.csproj -c Release -f net9.0-android
+        dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.csproj -c Release -f net9.0-android /p:AndroidSdkDirectory=C:\android-sdk
+        dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.csproj -c Release -f net9.0-android /p:AndroidSdkDirectory=C:\android-sdk
+        dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.csproj -c Release -f net9.0-android /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Publish Android App (x64)
-      run: dotnet publish ICYOU.Mobile/ICYOU.Mobile.csproj -c Release -f net9.0-android -r android-x64
+      run: dotnet publish ICYOU.Mobile/ICYOU.Mobile.csproj -c Release -f net9.0-android -r android-x64 /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Copy APK
@@ -166,22 +166,22 @@ jobs:
       shell: cmd
       
     - name: Build ICYOU.SDK
-      run: dotnet build ICYOU.SDK/ICYOU.SDK.arm64.csproj -c Release -f net9.0-android -r android-arm64
+      run: dotnet build ICYOU.SDK/ICYOU.SDK.arm64.csproj -c Release -f net9.0-android -r android-arm64 /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Build ICYOU.Core
-      run: dotnet build ICYOU.Core/ICYOU.Core.arm64.csproj -c Release -f net9.0-android -r android-arm64
+      run: dotnet build ICYOU.Core/ICYOU.Core.arm64.csproj -c Release -f net9.0-android -r android-arm64 /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Build Modules
       run: |
-        dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.arm64.csproj -c Release -f net9.0-android -r android-arm64
-        dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.arm64.csproj -c Release -f net9.0-android -r android-arm64
-        dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.arm64.csproj -c Release -f net9.0-android -r android-arm64
+        dotnet build ICYOU.Modules.E2E/ICYOU.Modules.E2E.arm64.csproj -c Release -f net9.0-android -r android-arm64 /p:AndroidSdkDirectory=C:\android-sdk
+        dotnet build ICYOU.Modules.Quote/ICYOU.Modules.Quote.arm64.csproj -c Release -f net9.0-android -r android-arm64 /p:AndroidSdkDirectory=C:\android-sdk
+        dotnet build ICYOU.Modules.LinkPreview/ICYOU.Modules.LinkPreview.arm64.csproj -c Release -f net9.0-android -r android-arm64 /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Publish Android App (ARM64)
-      run: dotnet publish ICYOU.Mobile/ICYOU.Mobile.ARM64.csproj -c Release -f net9.0-android -r android-arm64
+      run: dotnet publish ICYOU.Mobile/ICYOU.Mobile.ARM64.csproj -c Release -f net9.0-android -r android-arm64 /p:AndroidSdkDirectory=C:\android-sdk
       shell: cmd
       
     - name: Copy APK
